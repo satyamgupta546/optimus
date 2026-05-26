@@ -37,6 +37,7 @@ export function resolveVariant(config, pnc = {}, widget = {}) {
         is_optimized: pnc.is_optimized ?? config.properties?.is_optimized?.default ?? true,
         has_multimedia: hasMultimedia,
         variant: pnc.variant ?? config.properties?.variant?.default,
+        displayMode: pnc.displayMode ?? config.properties?.displayMode?.default ?? 'scroll',
     };
 
     // Match only on keys that exist in this config's matrix
