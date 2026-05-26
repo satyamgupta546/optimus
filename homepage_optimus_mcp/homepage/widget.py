@@ -294,11 +294,26 @@ async def _edit(args: dict, configs: dict) -> dict:
                 "next_step": "Call sam_widget(action='edit', slug=..., fields_to_update=..., env=..., confirm=true)"
             }
 
-        # Fill start_time/end_time from current if not in user fields
+        # Fill mandatory fields from current data if not in user fields
         if "start_time" not in fields and item.get("start_time"):
             fields["start_time"] = str(item["start_time"]).replace("T", " ").replace("+00:00", "").replace("Z", "")
         if "end_time" not in fields and item.get("end_time"):
             fields["end_time"] = str(item["end_time"]).replace("T", " ").replace("+00:00", "").replace("Z", "")
+
+        # Detect item_type from slug
+        if "item_type" not in fields:
+            if "_pr_wi" in slug:
+                fields["item_type"] = "item_rows"
+            elif "_cl_wi" in slug or "_carousel" in slug:
+                fields["item_type"] = "carousel"
+            elif "_cat_wi" in slug:
+                fields["item_type"] = "category"
+            else:
+                fields["item_type"] = "sub_category"
+
+        # text_en — use slug base if not provided
+        if "text_en" not in fields:
+            fields["text_en"] = slug.replace("_", " ").split(" sc wi")[0].split(" pr wi")[0].title()
 
         # Execute update
         result = await samaan.update_widget_item(str(item_id), slug, fields)
@@ -501,10 +516,10 @@ def _get_parent_widget_slug(item_slug: str) -> str:
     # Remove item type suffix and add widget suffix
     if "_sc_wi" in item_slug:
         base = item_slug.replace("_sc_wi", "")
-        return f"{base}_spr_opt"
+        return f"{base}_plp_w"
     elif "_pr_wi" in item_slug:
         base = item_slug.replace("_pr_wi", "")
-        return f"{base}_spr_opt"
+        return f"{base}_spr"
     elif "_sub_cat_wi" in item_slug:
         base = item_slug.replace("_sub_cat_wi", "")
         return f"{base}_Cl_w_HP"

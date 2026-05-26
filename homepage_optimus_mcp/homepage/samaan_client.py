@@ -263,40 +263,49 @@ class SamaanClient:
     # ── Get Widget Item by slug ──
 
     async def get_widget_items(self, widget_slug: str) -> dict:
-        """GET widget items mapped to a widget via get_paginated_widget_widget_item_mappings."""
-        import urllib.request
+        """GET widget items mapped to a widget. Tries slug + _plp_w variant."""
+        import urllib.request, http.cookiejar
 
-        url = f"{self.base_url}/api/app/get_paginated_widget_widget_item_mappings/?widget_query={widget_slug}&limit=50&page_no=1&status=active&sort=-updated_at"
+        slugs_to_try = [widget_slug]
+        for suffix in ["_spr_opt", "_spr", "_Cl_w_HP", "_cm_hp", "_sm_hp", "_pm_hp"]:
+            if widget_slug.endswith(suffix):
+                base = widget_slug[:-len(suffix)]
+                slugs_to_try.insert(0, f"{base}_plp_w")
+                break
 
-        try:
-            req = urllib.request.Request(url, headers={
-                "Cookie": f"csrftoken={self.csrf_token}; sessionid={self.session_id}",
-                "X-CSRFToken": self.csrf_token,
-                "Accept": "application/json",
-                "User-Agent": "SAM-Bot/1.0",
-            })
-            import http.cookiejar
-            jar = http.cookiejar.CookieJar()
-            opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
-            resp = opener.open(req, timeout=15)
-            data = json.loads(resp.read())
+        for try_slug in slugs_to_try:
+            try:
+                url = f"{self.base_url}/api/app/get_paginated_widget_widget_item_mappings/?widget_query={try_slug}&limit=50&page_no=1&status=active&sort=-updated_at"
+                req = urllib.request.Request(url, headers={
+                    "Cookie": f"csrftoken={self.csrf_token}; sessionid={self.session_id}",
+                    "X-CSRFToken": self.csrf_token,
+                    "Accept": "application/json",
+                    "User-Agent": "SAM-Bot/1.0",
+                })
+                jar_temp = http.cookiejar.CookieJar()
+                opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar_temp))
+                resp = opener.open(req, timeout=15)
+                data = json.loads(resp.read())
 
-            items = []
-            for widget in data.get("data", []):
-                for mapping in widget.get("mapping_data", []):
-                    items.append({
-                        "widget_item_id": mapping.get("widget_item_id"),
-                        "slug_name": mapping.get("widget_item__slug_name"),
-                        "level_tag": mapping.get("level_tag"),
-                        "level_property": mapping.get("level_property"),
-                        "priority": mapping.get("priority"),
-                        "start_time": mapping.get("widget_item__start_time"),
-                        "end_time": mapping.get("widget_item__end_time"),
-                        "active": mapping.get("active"),
-                    })
-            return {"items": items, "count": len(items)}
-        except Exception as e:
-            return {"error": str(e)}
+                items = []
+                for widget in data.get("data", []):
+                    for mapping in widget.get("mapping_data", []):
+                        items.append({
+                            "widget_item_id": mapping.get("widget_item_id"),
+                            "slug_name": mapping.get("widget_item__slug_name"),
+                            "level_tag": mapping.get("level_tag"),
+                            "level_property": mapping.get("level_property"),
+                            "priority": mapping.get("priority"),
+                            "start_time": mapping.get("widget_item__start_time"),
+                            "end_time": mapping.get("widget_item__end_time"),
+                            "active": mapping.get("active"),
+                        })
+                if items:
+                    return {"items": items, "count": len(items)}
+            except Exception:
+                continue
+
+        return {"items": [], "count": 0}
 
     # ── PATCH Widget (update heading, start_time, end_time) ──
 

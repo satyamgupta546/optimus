@@ -2680,5 +2680,62 @@
     "error": "",
     "timestamp": 1779777249.0378082,
     "timestamp_iso": "2026-05-26T06:34:09Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget_item.edit",
+    "slug": "test_prod_sam_satyam_sc_wi_jh",
+    "params": {
+      "product_list": "369,370,90513",
+      "start_time": "2026-05-17 16:15:00",
+      "end_time": "2026-05-30 06:30:00"
+    },
+    "response": {
+      "error": "Update widget_item test_prod_sam_satyam_sc_wi_jh (id=15749) failed: HTTP 400",
+      "detail": "{\"error\":\"Text needs to be provided for selected Item Type\"}"
+    },
+    "status": "failed",
+    "error": "",
+    "timestamp": 1779778294.234907,
+    "timestamp_iso": "2026-05-26T06:51:34Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget_item.edit",
+    "slug": "test_prod_sam_satyam_sc_wi_jh",
+    "params": {
+      "product_list": "369,370,90513",
+      "start_time": "2026-05-16 18:30:00",
+      "end_time": "2026-07-31 18:30:00",
+      "item_type": "sub_category",
+      "text_en": "Test Prod Sam Satyam"
+    },
+    "response": {
+      "status": "updated",
+      "item_id": "15749",
+      "slug": "test_prod_sam_satyam_sc_wi_jh"
+    },
+    "status": "success",
+    "error": "",
+    "timestamp": 1779778337.090952,
+    "timestamp_iso": "2026-05-26T06:52:17Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.edit",
+    "slug": "test_prod_sam_satyam_spr_opt",
+    "params": {
+      "start_time": "2026-06-01 00:00:00",
+      "end_time": "2026-09-01 00:00:00"
+    },
+    "response": {
+      "status": "updated",
+      "slug": "test_prod_sam_satyam_spr_opt",
+      "id": 9389
+    },
+    "status": "success",
+    "error": "",
+    "timestamp": 1779778338.1216571,
+    "timestamp_iso": "2026-05-26T06:52:18Z"
   }
 ]
