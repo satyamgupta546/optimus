@@ -1,0 +1,32 @@
+{
+    "default_env": "UAT",
+    "environments": {
+        "PROD": "https://samaan.apnamart.in",
+        "UAT": "https://smapi-cu.apnamart.in"
+    },
+    "credentials": {
+        "PROD": {
+            "username": "Automation",
+            "password": "Qwerty@123"
+        },
+        "UAT": {
+            "username": "vicky.das",
+            "password": "qwerty@123"
+        }
+    },
+    "endpoints": {
+        "login": "/login/",
+        "bulk_upload": "/api/app/bulk_upload_products_for_wi/",
+        "widget_item": "/api/app/post_widget_item/",
+        "widget": "/api/app/widget/",
+        "page_layout": "/api/app/post_page_layout/",
+        "multimedia": "/api/app/multimedia/",
+        "map_widget_items": "/api/app/update_widget_widget_item_mapping/",
+        "map_layout_widget": "/api/app/update_layout_widget_mapping/",
+        "map_page_layout": "/api/app/update_page_page_layout_mapping/",
+        "get_widget": "/api/app/get_widget/",
+        "get_widget_item": "/api/app/widget_item/",
+        "patch_widget": "/api/app/widget/",
+        "put_widget_item": "/api/app/widget_item/"
+    }
+}

@@ -1,0 +1,2684 @@
+[
+  {
+    "user_email": "satyam@test.com",
+    "action": "widget.create",
+    "slug": "test_spr",
+    "params": {
+      "type": "spr"
+    },
+    "response": {},
+    "status": "success",
+    "error": "",
+    "timestamp": 1778368803.483077,
+    "timestamp_iso": "2026-05-09T23:20:03Z"
+  },
+  {
+    "user_email": "mcp_user",
+    "action": "widget.create",
+    "slug": "test_uat_sam",
+    "params": {
+      "type": "spr",
+      "title": "spr test",
+      "slug": "test_uat_sam",
+      "products": "369,370,90513",
+      "stateProducts": {
+        "global": "369,370,90513",
+        "jharkhand": "369,370,90513",
+        "chhattisgarh": "369,370,90513",
+        "west bengal": "369,370,90513"
+      },
+      "pageType": "product_listing_page",
+      "start_time": "2026-05-12 18:30:00",
+      "end_time": "2026-05-30 12:00:00"
+    },
+    "response": {
+      "error": "Optimus API POST /widgets failed: HTTP 500",
+      "detail": {
+        "error": "Unexpected non-whitespace character after JSON at position 3 (line 1 column 4)"
+      }
+    },
+    "status": "failed",
+    "error": "Optimus API POST /widgets failed: HTTP 500",
+    "timestamp": 1778778839.100381,
+    "timestamp_iso": "2026-05-14T17:13:59Z"
+  },
+  {
+    "user_email": "mcp_user",
+    "action": "widget.create",
+    "slug": "test_uat_sam",
+    "params": {
+      "type": "spr",
+      "title": "spr test",
+      "slug": "test_uat_sam",
+      "products": "369,370,90513",
+      "stateProducts": {
+        "global": "369,370,90513",
+        "jharkhand": "369,370,90513",
+        "chhattisgarh": "369,370,90513",
+        "west bengal": "369,370,90513"
+      },
+      "pageType": "product_listing_page",
+      "start_time": "2026-05-12 18:30:00",
+      "end_time": "2026-05-30 12:00:00"
+    },
+    "response": {
+      "error": "Optimus API POST /widgets failed: HTTP 500",
+      "detail": {
+        "error": "Unexpected non-whitespace character after JSON at position 3 (line 1 column 4)"
+      }
+    },
+    "status": "failed",
+    "error": "Optimus API POST /widgets failed: HTTP 500",
+    "timestamp": 1778778952.362765,
+    "timestamp_iso": "2026-05-14T17:15:52Z"
+  },
+  {
+    "user_email": "mcp_user",
+    "action": "widget.create",
+    "slug": "test_uat_sam",
+    "params": {
+      "type": "product_rail",
+      "slug": "test_uat_sam",
+      "title": "spr test",
+      "titleHi": "",
+      "pnc": {
+        "rows": 1,
+        "is_optimized": true,
+        "has_multimedia": false
+      },
+      "config": {
+        "pageType": "product_listing_page",
+        "stateProducts": {
+          "global": "369,370,90513",
+          "jharkhand": "369,370,90513",
+          "chhattisgarh": "369,370,90513",
+          "west bengal": "369,370,90513"
+        },
+        "start_time": "2026-05-12 18:30:00",
+        "end_time": "2026-05-30 12:00:00"
+      },
+      "products": [
+        "369",
+        "370",
+        "90513"
+      ],
+      "sortOrder": 0
+    },
+    "response": {
+      "error": "Optimus API POST /widgets failed: HTTP 500",
+      "detail": {
+        "error": "Supabase: TypeError: fetch failed"
+      }
+    },
+    "status": "failed",
+    "error": "Optimus API POST /widgets failed: HTTP 500",
+    "timestamp": 1778779002.161758,
+    "timestamp_iso": "2026-05-14T17:16:42Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.create",
+    "slug": "test_uat_sam_bq",
+    "params": {
+      "type": "product_rail",
+      "slug": "test_uat_sam_bq",
+      "env": "UAT",
+      "title": "spr test sam",
+      "titleHi": "",
+      "pnc": {
+        "rows": 1,
+        "is_optimized": true,
+        "has_multimedia": false
+      },
+      "config": {
+        "pageType": "product_listing_page",
+        "stateProducts": {
+          "global": "369,370,90513",
+          "jharkhand": "369,370,90513",
+          "chhattisgarh": "369,370,90513",
+          "west bengal": "369,370,90513"
+        },
+        "start_time": "2026-05-14 18:30:00",
+        "end_time": "2026-05-30 12:00:00"
+      },
+      "products": [
+        "369",
+        "370",
+        "90513"
+      ],
+      "sortOrder": 0,
+      "author": "sam_mcp"
+    },
+    "response": {
+      "status": "created",
+      "widget_id": "75771a2b-5a25-4cd7-bcdc-220204d38112",
+      "slug": "test_uat_sam_bq"
+    },
+    "status": "success",
+    "error": "",
+    "timestamp": 1778780089.8885279,
+    "timestamp_iso": "2026-05-14T17:34:49Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "slug.created",
+    "slug": "test_uat_sam_bq",
+    "params": {
+      "type": "product_rail",
+      "slug": "test_uat_sam_bq",
+      "env": "UAT",
+      "title": "spr test sam",
+      "titleHi": "",
+      "pnc": {
+        "rows": 1,
+        "is_optimized": true,
+        "has_multimedia": false
+      },
+      "config": {
+        "pageType": "product_listing_page",
+        "stateProducts": {
+          "global": "369,370,90513",
+          "jharkhand": "369,370,90513",
+          "chhattisgarh": "369,370,90513",
+          "west bengal": "369,370,90513"
+        },
+        "start_time": "2026-05-14 18:30:00",
+        "end_time": "2026-05-30 12:00:00"
+      },
+      "products": [
+        "369",
+        "370",
+        "90513"
+      ],
+      "sortOrder": 0,
+      "author": "sam_mcp"
+    },
+    "response": {},
+    "status": "logged",
+    "error": "",
+    "timestamp": 1778780089.8909068,
+    "timestamp_iso": "2026-05-14T17:34:49Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.create",
+    "slug": "sam_test_spr",
+    "params": {
+      "type": "spr",
+      "env": "UAT"
+    },
+    "response": {
+      "steps": [
+        {
+          "step": 1,
+          "message": "Sub-cat sam_test_spr_sc_wi_global",
+          "status": "failed",
+          "error": "{'error': 'Authentication credentials were not provided.'}"
+        }
+      ],
+      "slug": "sam_test_spr",
+      "status": "failed",
+      "error": "Step 1/9 failed: Sub-cat sam_test_spr_sc_wi_global — {'error': 'Authentication credentials were not provided.'}"
+    },
+    "status": "failed",
+    "error": "Step 1/9 failed: Sub-cat sam_test_spr_sc_wi_global — {'error': 'Authentication credentials were not provided.'}",
+    "timestamp": 1778876613.236344,
+    "timestamp_iso": "2026-05-15T20:23:33Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.create",
+    "slug": "sam_test_spr",
+    "params": {
+      "type": "spr",
+      "env": "UAT"
+    },
+    "response": {
+      "steps": [
+        {
+          "step": 1,
+          "message": "Sub-cat sam_test_spr_sc_wi_global",
+          "status": "failed",
+          "error": "{'error': 'Authentication credentials were not provided.'}"
+        }
+      ],
+      "slug": "sam_test_spr",
+      "status": "failed",
+      "error": "Step 1/9 failed: Sub-cat sam_test_spr_sc_wi_global — {'error': 'Authentication credentials were not provided.'}"
+    },
+    "status": "failed",
+    "error": "Step 1/9 failed: Sub-cat sam_test_spr_sc_wi_global — {'error': 'Authentication credentials were not provided.'}",
+    "timestamp": 1778876697.1928918,
+    "timestamp_iso": "2026-05-15T20:24:57Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.create",
+    "slug": "sam_test_spr_v2",
+    "params": {
+      "type": "spr",
+      "env": "UAT"
+    },
+    "response": {
+      "steps": [
+        {
+          "step": 1,
+          "message": "Sub-cat sam_test_spr_v2_sc_wi_global",
+          "status": "failed",
+          "error": "{'error': 'Authentication credentials were not provided.'}"
+        }
+      ],
+      "slug": "sam_test_spr_v2",
+      "status": "failed",
+      "error": "Step 1/9 failed: Sub-cat sam_test_spr_v2_sc_wi_global — {'error': 'Authentication credentials were not provided.'}"
+    },
+    "status": "failed",
+    "error": "Step 1/9 failed: Sub-cat sam_test_spr_v2_sc_wi_global — {'error': 'Authentication credentials were not provided.'}",
+    "timestamp": 1778876785.262856,
+    "timestamp_iso": "2026-05-15T20:26:25Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.create",
+    "slug": "sam_test_spr_v3",
+    "params": {
+      "type": "spr",
+      "env": "UAT"
+    },
+    "response": {
+      "steps": [
+        {
+          "step": 1,
+          "message": "Sub-cat sam_test_spr_v3_sc_wi_global",
+          "status": "failed",
+          "error": "{'error': 'HTTP 500', 'raw': '\\n<!doctype html>\\n<html lang=\"en\">\\n<head>\\n  <title>Server Error (500)</title>\\n</head>\\n<body>\\n  <h1>Server Error (500)</h1><p></p>\\n</body>\\n</html>\\n'}"
+        }
+      ],
+      "slug": "sam_test_spr_v3",
+      "status": "failed",
+      "error": "Step 1/9 failed: Sub-cat sam_test_spr_v3_sc_wi_global — {'error': 'HTTP 500', 'raw': '\\n<!doctype html>\\n<html lang=\"en\">\\n<head>\\n  <title>Server Error (500)</title>\\n</head>\\n<body>\\n  <h1>Server Error (500)</h1><p></p>\\n</body>\\n</html>\\n'}"
+    },
+    "status": "failed",
+    "error": "Step 1/9 failed: Sub-cat sam_test_spr_v3_sc_wi_global — {'error': 'HTTP 500', 'raw': '\\n<!doctype html>\\n<html lang=\"en\">\\n<head>\\n  <title>Server Error (500)</title>\\n</head>\\n<body>\\n  <h1>Server Error (500)</h1><p></p>\\n</body>\\n</html>\\n'}",
+    "timestamp": 1778878796.0318289,
+    "timestamp_iso": "2026-05-15T20:59:56Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.create",
+    "slug": "sam_test_spr_v4",
+    "params": {
+      "type": "spr",
+      "env": "UAT"
+    },
+    "response": {
+      "steps": [
+        {
+          "step": 1,
+          "message": "Created 4 sub-cat widget items",
+          "status": "ok"
+        },
+        {
+          "step": 2,
+          "message": "PLP widget sam_test_spr_v4_plp_w",
+          "status": "failed",
+          "error": "{'error': 'This field is required.'}"
+        }
+      ],
+      "slug": "sam_test_spr_v4",
+      "status": "failed",
+      "error": "Step 2/9 failed: PLP widget sam_test_spr_v4_plp_w — {'error': 'This field is required.'}"
+    },
+    "status": "failed",
+    "error": "Step 2/9 failed: PLP widget sam_test_spr_v4_plp_w — {'error': 'This field is required.'}",
+    "timestamp": 1778879139.6317272,
+    "timestamp_iso": "2026-05-15T21:05:39Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.create",
+    "slug": "sam_test_spr_v5",
+    "params": {
+      "type": "spr",
+      "env": "UAT"
+    },
+    "response": {
+      "steps": [
+        {
+          "step": 1,
+          "message": "Created 4 sub-cat widget items",
+          "status": "ok"
+        },
+        {
+          "step": 2,
+          "message": "PLP widget sam_test_spr_v5_plp_w",
+          "status": "failed",
+          "error": "{'error': 'This field is required.'}"
+        }
+      ],
+      "slug": "sam_test_spr_v5",
+      "status": "failed",
+      "error": "Step 2/9 failed: PLP widget sam_test_spr_v5_plp_w — {'error': 'This field is required.'}"
+    },
+    "status": "failed",
+    "error": "Step 2/9 failed: PLP widget sam_test_spr_v5_plp_w — {'error': 'This field is required.'}",
+    "timestamp": 1778879192.426763,
+    "timestamp_iso": "2026-05-15T21:06:32Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.create",
+    "slug": "sam_test_spr_v6",
+    "params": {
+      "type": "spr",
+      "env": "UAT"
+    },
+    "response": {
+      "steps": [
+        {
+          "step": 1,
+          "message": "Created 4 sub-cat widget items",
+          "status": "ok"
+        },
+        {
+          "step": 2,
+          "message": "Created PLP widget: sam_test_spr_v6_plp_w",
+          "status": "ok"
+        },
+        {
+          "step": 3,
+          "message": "Created page layout: sam_test_spr_v6_page_p",
+          "status": "ok"
+        },
+        {
+          "step": 4,
+          "message": "Mapped 4 sub-cats → PLP widget",
+          "status": "ok"
+        },
+        {
+          "step": 5,
+          "message": "Mapped PLP → Page layout",
+          "status": "ok"
+        },
+        {
+          "step": 6,
+          "message": "Mapped Page → Global registry",
+          "status": "ok"
+        },
+        {
+          "step": 7,
+          "message": "Created row widget item: sam_test_spr_v6_pr_wi",
+          "status": "ok"
+        },
+        {
+          "step": 8,
+          "message": "Created SPR widget: sam_test_spr_v6_spr_opt",
+          "status": "ok"
+        },
+        {
+          "step": 9,
+          "message": "Mapped Row item → SPR widget",
+          "status": "ok"
+        }
+      ],
+      "slug": "sam_test_spr_v6",
+      "status": "deployed",
+      "spr_slug": "sam_test_spr_v6_spr_opt",
+      "plp_slug": "sam_test_spr_v6_plp_w",
+      "page_slug": "sam_test_spr_v6_page_p",
+      "message": "Widget deployed! SPR slug: sam_test_spr_v6_spr_opt"
+    },
+    "status": "success",
+    "error": "",
+    "timestamp": 1778964118.144886,
+    "timestamp_iso": "2026-05-16T20:41:58Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "slug.created",
+    "slug": "sam_test_spr_v6",
+    "params": {
+      "type": "spr",
+      "states": [
+        "JH",
+        "CG",
+        "WB"
+      ]
+    },
+    "response": {},
+    "status": "logged",
+    "error": "",
+    "timestamp": 1778964118.1467571,
+    "timestamp_iso": "2026-05-16T20:41:58Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.create",
+    "slug": "sam_state_test_v1",
+    "params": {
+      "type": "spr",
+      "env": "UAT"
+    },
+    "response": {
+      "steps": [
+        {
+          "step": 1,
+          "message": "Created 4 sub-cat widget items",
+          "status": "ok"
+        },
+        {
+          "step": 2,
+          "message": "Created PLP widget: sam_state_test_v1_plp_w",
+          "status": "ok"
+        },
+        {
+          "step": 3,
+          "message": "Created page layout: sam_state_test_v1_page_p",
+          "status": "ok"
+        },
+        {
+          "step": 4,
+          "message": "Mapped 4 sub-cats → PLP widget",
+          "status": "ok"
+        },
+        {
+          "step": 5,
+          "message": "Mapped PLP → Page layout",
+          "status": "ok"
+        },
+        {
+          "step": 6,
+          "message": "Mapped Page → Global registry",
+          "status": "ok"
+        },
+        {
+          "step": 7,
+          "message": "Created 4 row widget items (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 8,
+          "message": "Created SPR widget: sam_state_test_v1_spr_opt",
+          "status": "ok"
+        },
+        {
+          "step": 9,
+          "message": "Mapped Row item → SPR widget",
+          "status": "ok"
+        }
+      ],
+      "slug": "sam_state_test_v1",
+      "status": "deployed",
+      "spr_slug": "sam_state_test_v1_spr_opt",
+      "plp_slug": "sam_state_test_v1_plp_w",
+      "page_slug": "sam_state_test_v1_page_p",
+      "message": "Widget deployed! SPR slug: sam_state_test_v1_spr_opt"
+    },
+    "status": "success",
+    "error": "",
+    "timestamp": 1778964322.281333,
+    "timestamp_iso": "2026-05-16T20:45:22Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "slug.created",
+    "slug": "sam_state_test_v1",
+    "params": {
+      "type": "spr",
+      "states": [
+        "JH",
+        "CG",
+        "WB"
+      ]
+    },
+    "response": {},
+    "status": "logged",
+    "error": "",
+    "timestamp": 1778964322.2838132,
+    "timestamp_iso": "2026-05-16T20:45:22Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.create",
+    "slug": "test_uat_sam",
+    "params": {
+      "type": "spr",
+      "env": "UAT"
+    },
+    "response": {
+      "steps": [
+        {
+          "step": 1,
+          "message": "Created 4 sub-cat widget items",
+          "status": "ok"
+        },
+        {
+          "step": 2,
+          "message": "Created PLP widget: test_uat_sam_plp_w",
+          "status": "ok"
+        },
+        {
+          "step": 3,
+          "message": "Created page layout: test_uat_sam_page_p",
+          "status": "ok"
+        },
+        {
+          "step": 4,
+          "message": "Mapped 4 sub-cats → PLP widget",
+          "status": "ok"
+        },
+        {
+          "step": 5,
+          "message": "Mapped PLP → Page layout",
+          "status": "ok"
+        },
+        {
+          "step": 6,
+          "message": "Mapped Page → Global registry",
+          "status": "ok"
+        },
+        {
+          "step": 7,
+          "message": "Created 4 row widget items (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 8,
+          "message": "Created SPR widget: test_uat_sam_spr_opt",
+          "status": "ok"
+        },
+        {
+          "step": 9,
+          "message": "Mapped Row item → SPR widget",
+          "status": "ok"
+        }
+      ],
+      "slug": "test_uat_sam",
+      "status": "deployed",
+      "spr_slug": "test_uat_sam_spr_opt",
+      "plp_slug": "test_uat_sam_plp_w",
+      "page_slug": "test_uat_sam_page_p",
+      "message": "Widget deployed! SPR slug: test_uat_sam_spr_opt"
+    },
+    "status": "success",
+    "error": "",
+    "timestamp": 1778967332.896897,
+    "timestamp_iso": "2026-05-16T21:35:32Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "slug.created",
+    "slug": "test_uat_sam",
+    "params": {
+      "type": "spr",
+      "states": [
+        "JH",
+        "CG",
+        "WB"
+      ]
+    },
+    "response": {},
+    "status": "logged",
+    "error": "",
+    "timestamp": 1778967332.900556,
+    "timestamp_iso": "2026-05-16T21:35:32Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.create",
+    "slug": "test_prod_sam_satyam",
+    "params": {
+      "type": "spr",
+      "env": "PROD"
+    },
+    "response": {
+      "steps": [
+        {
+          "step": 1,
+          "message": "Created 4 sub-cat widget items",
+          "status": "ok"
+        },
+        {
+          "step": 2,
+          "message": "Created PLP widget: test_prod_sam_satyam_plp_w",
+          "status": "ok"
+        },
+        {
+          "step": 3,
+          "message": "Created page layout: test_prod_sam_satyam_page_p",
+          "status": "ok"
+        },
+        {
+          "step": 4,
+          "message": "Mapped 4 sub-cats → PLP widget",
+          "status": "ok"
+        },
+        {
+          "step": 5,
+          "message": "Mapped PLP → Page layout",
+          "status": "ok"
+        },
+        {
+          "step": 6,
+          "message": "Mapped Page → Global registry",
+          "status": "ok"
+        },
+        {
+          "step": 7,
+          "message": "Created 4 row widget items (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 8,
+          "message": "Created SPR widget: test_prod_sam_satyam_spr_opt",
+          "status": "ok"
+        },
+        {
+          "step": 9,
+          "message": "Mapped Row item → SPR widget",
+          "status": "ok"
+        }
+      ],
+      "slug": "test_prod_sam_satyam",
+      "status": "deployed",
+      "spr_slug": "test_prod_sam_satyam_spr_opt",
+      "plp_slug": "test_prod_sam_satyam_plp_w",
+      "page_slug": "test_prod_sam_satyam_page_p",
+      "message": "Widget deployed! SPR slug: test_prod_sam_satyam_spr_opt"
+    },
+    "status": "success",
+    "error": "",
+    "timestamp": 1778967537.565918,
+    "timestamp_iso": "2026-05-16T21:38:57Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "slug.created",
+    "slug": "test_prod_sam_satyam",
+    "params": {
+      "type": "spr",
+      "states": [
+        "JH",
+        "CG",
+        "WB"
+      ]
+    },
+    "response": {},
+    "status": "logged",
+    "error": "",
+    "timestamp": 1778967537.570625,
+    "timestamp_iso": "2026-05-16T21:38:57Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.create",
+    "slug": "sam_dpr_test",
+    "params": {
+      "type": "dpr",
+      "env": "UAT"
+    },
+    "response": {
+      "steps": [
+        {
+          "step": 1,
+          "message": "Created 3 sub-cat widget items",
+          "status": "ok"
+        },
+        {
+          "step": 2,
+          "message": "Created PLP widget: sam_dpr_test_plp_w",
+          "status": "ok"
+        },
+        {
+          "step": 3,
+          "message": "Created page layout: sam_dpr_test_page_p",
+          "status": "ok"
+        },
+        {
+          "step": 4,
+          "message": "Mapped 3 sub-cats → PLP widget",
+          "status": "ok"
+        },
+        {
+          "step": 5,
+          "message": "Mapped PLP → Page layout",
+          "status": "ok"
+        },
+        {
+          "step": 6,
+          "message": "Mapped Page → Global registry",
+          "status": "ok"
+        },
+        {
+          "step": 7,
+          "message": "Created 3 row widget items (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 8,
+          "message": "Created double_product_row_v2 widget: sam_dpr_test_spr_opt",
+          "status": "ok"
+        },
+        {
+          "step": 9,
+          "message": "Mapped Row items → SPR widget (state-wise)",
+          "status": "ok"
+        }
+      ],
+      "slug": "sam_dpr_test",
+      "status": "deployed",
+      "spr_slug": "sam_dpr_test_spr_opt",
+      "plp_slug": "sam_dpr_test_plp_w",
+      "page_slug": "sam_dpr_test_page_p",
+      "message": "Widget deployed! SPR slug: sam_dpr_test_spr_opt"
+    },
+    "status": "success",
+    "error": "",
+    "timestamp": 1778969159.297101,
+    "timestamp_iso": "2026-05-16T22:05:59Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "slug.created",
+    "slug": "sam_dpr_test",
+    "params": {
+      "type": "dpr",
+      "states": [
+        "JH",
+        "CG"
+      ]
+    },
+    "response": {},
+    "status": "logged",
+    "error": "",
+    "timestamp": 1778969159.299454,
+    "timestamp_iso": "2026-05-16T22:05:59Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.create",
+    "slug": "sam_spr_std_test",
+    "params": {
+      "type": "spr",
+      "env": "UAT"
+    },
+    "response": {
+      "steps": [
+        {
+          "step": 1,
+          "message": "Created 2 sub-cat widget items",
+          "status": "ok"
+        },
+        {
+          "step": 2,
+          "message": "Created PLP widget: sam_spr_std_test_plp_w",
+          "status": "ok"
+        },
+        {
+          "step": 3,
+          "message": "Created page layout: sam_spr_std_test_page_p",
+          "status": "ok"
+        },
+        {
+          "step": 4,
+          "message": "Mapped 2 sub-cats → PLP widget",
+          "status": "ok"
+        },
+        {
+          "step": 5,
+          "message": "Mapped PLP → Page layout",
+          "status": "ok"
+        },
+        {
+          "step": 6,
+          "message": "Mapped Page → Global registry",
+          "status": "ok"
+        },
+        {
+          "step": 7,
+          "message": "Created 2 row widget items (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 8,
+          "message": "Created single_product_row widget: sam_spr_std_test_spr",
+          "status": "ok"
+        },
+        {
+          "step": 9,
+          "message": "Mapped Row items → SPR widget (state-wise)",
+          "status": "ok"
+        }
+      ],
+      "slug": "sam_spr_std_test",
+      "status": "deployed",
+      "spr_slug": "sam_spr_std_test_spr",
+      "plp_slug": "sam_spr_std_test_plp_w",
+      "page_slug": "sam_spr_std_test_page_p",
+      "message": "Widget deployed! SPR slug: sam_spr_std_test_spr"
+    },
+    "status": "success",
+    "error": "",
+    "timestamp": 1778969163.584625,
+    "timestamp_iso": "2026-05-16T22:06:03Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "slug.created",
+    "slug": "sam_spr_std_test",
+    "params": {
+      "type": "spr",
+      "states": [
+        "JH"
+      ]
+    },
+    "response": {},
+    "status": "logged",
+    "error": "",
+    "timestamp": 1778969163.5857909,
+    "timestamp_iso": "2026-05-16T22:06:03Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.create",
+    "slug": "sam_all_test_spr_std",
+    "params": {
+      "type": "spr",
+      "env": "UAT"
+    },
+    "response": {
+      "steps": [
+        {
+          "step": 1,
+          "message": "Created 4 sub-cat widget items",
+          "status": "ok"
+        },
+        {
+          "step": 2,
+          "message": "Created PLP widget: sam_all_test_spr_std_plp_w",
+          "status": "ok"
+        },
+        {
+          "step": 3,
+          "message": "Created page layout: sam_all_test_spr_std_page_p",
+          "status": "ok"
+        },
+        {
+          "step": 4,
+          "message": "Mapped 4 sub-cats → PLP widget",
+          "status": "ok"
+        },
+        {
+          "step": 5,
+          "message": "Mapped PLP → Page layout",
+          "status": "ok"
+        },
+        {
+          "step": 6,
+          "message": "Mapped Page → Global registry",
+          "status": "ok"
+        },
+        {
+          "step": 7,
+          "message": "Created 4 row widget items (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 8,
+          "message": "Created single_product_row widget: sam_all_test_spr_std_spr",
+          "status": "ok"
+        },
+        {
+          "step": 9,
+          "message": "Mapped Row items → SPR widget (state-wise)",
+          "status": "ok"
+        }
+      ],
+      "slug": "sam_all_test_spr_std",
+      "status": "deployed",
+      "spr_slug": "sam_all_test_spr_std_spr",
+      "plp_slug": "sam_all_test_spr_std_plp_w",
+      "page_slug": "sam_all_test_spr_std_page_p",
+      "message": "Widget deployed! SPR slug: sam_all_test_spr_std_spr"
+    },
+    "status": "success",
+    "error": "",
+    "timestamp": 1778969197.4507039,
+    "timestamp_iso": "2026-05-16T22:06:37Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "slug.created",
+    "slug": "sam_all_test_spr_std",
+    "params": {
+      "type": "spr",
+      "states": [
+        "JH",
+        "CG",
+        "WB"
+      ]
+    },
+    "response": {},
+    "status": "logged",
+    "error": "",
+    "timestamp": 1778969197.454099,
+    "timestamp_iso": "2026-05-16T22:06:37Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.create",
+    "slug": "sam_all_test_spr_opt",
+    "params": {
+      "type": "spr",
+      "env": "UAT"
+    },
+    "response": {
+      "steps": [
+        {
+          "step": 1,
+          "message": "Created 4 sub-cat widget items",
+          "status": "ok"
+        },
+        {
+          "step": 2,
+          "message": "Created PLP widget: sam_all_test_spr_opt_plp_w",
+          "status": "ok"
+        },
+        {
+          "step": 3,
+          "message": "Created page layout: sam_all_test_spr_opt_page_p",
+          "status": "ok"
+        },
+        {
+          "step": 4,
+          "message": "Mapped 4 sub-cats → PLP widget",
+          "status": "ok"
+        },
+        {
+          "step": 5,
+          "message": "Mapped PLP → Page layout",
+          "status": "ok"
+        },
+        {
+          "step": 6,
+          "message": "Mapped Page → Global registry",
+          "status": "ok"
+        },
+        {
+          "step": 7,
+          "message": "Created 4 row widget items (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 8,
+          "message": "Created single_product_row_v2 widget: sam_all_test_spr_opt_spr_opt",
+          "status": "ok"
+        },
+        {
+          "step": 9,
+          "message": "Mapped Row items → SPR widget (state-wise)",
+          "status": "ok"
+        }
+      ],
+      "slug": "sam_all_test_spr_opt",
+      "status": "deployed",
+      "spr_slug": "sam_all_test_spr_opt_spr_opt",
+      "plp_slug": "sam_all_test_spr_opt_plp_w",
+      "page_slug": "sam_all_test_spr_opt_page_p",
+      "message": "Widget deployed! SPR slug: sam_all_test_spr_opt_spr_opt"
+    },
+    "status": "success",
+    "error": "",
+    "timestamp": 1778969202.994026,
+    "timestamp_iso": "2026-05-16T22:06:42Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "slug.created",
+    "slug": "sam_all_test_spr_opt",
+    "params": {
+      "type": "spr",
+      "states": [
+        "JH",
+        "CG",
+        "WB"
+      ]
+    },
+    "response": {},
+    "status": "logged",
+    "error": "",
+    "timestamp": 1778969202.9962409,
+    "timestamp_iso": "2026-05-16T22:06:42Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.create",
+    "slug": "sam_all_test_dpr_std",
+    "params": {
+      "type": "dpr",
+      "env": "UAT"
+    },
+    "response": {
+      "steps": [
+        {
+          "step": 1,
+          "message": "Created 4 sub-cat widget items",
+          "status": "ok"
+        },
+        {
+          "step": 2,
+          "message": "Created PLP widget: sam_all_test_dpr_std_plp_w",
+          "status": "ok"
+        },
+        {
+          "step": 3,
+          "message": "Created page layout: sam_all_test_dpr_std_page_p",
+          "status": "ok"
+        },
+        {
+          "step": 4,
+          "message": "Mapped 4 sub-cats → PLP widget",
+          "status": "ok"
+        },
+        {
+          "step": 5,
+          "message": "Mapped PLP → Page layout",
+          "status": "ok"
+        },
+        {
+          "step": 6,
+          "message": "Mapped Page → Global registry",
+          "status": "ok"
+        },
+        {
+          "step": 7,
+          "message": "Created 4 row widget items (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 8,
+          "message": "Created double_product_row widget: sam_all_test_dpr_std_spr",
+          "status": "ok"
+        },
+        {
+          "step": 9,
+          "message": "Mapped Row items → SPR widget (state-wise)",
+          "status": "ok"
+        }
+      ],
+      "slug": "sam_all_test_dpr_std",
+      "status": "deployed",
+      "spr_slug": "sam_all_test_dpr_std_spr",
+      "plp_slug": "sam_all_test_dpr_std_plp_w",
+      "page_slug": "sam_all_test_dpr_std_page_p",
+      "message": "Widget deployed! SPR slug: sam_all_test_dpr_std_spr"
+    },
+    "status": "success",
+    "error": "",
+    "timestamp": 1778969208.259616,
+    "timestamp_iso": "2026-05-16T22:06:48Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "slug.created",
+    "slug": "sam_all_test_dpr_std",
+    "params": {
+      "type": "dpr",
+      "states": [
+        "JH",
+        "CG",
+        "WB"
+      ]
+    },
+    "response": {},
+    "status": "logged",
+    "error": "",
+    "timestamp": 1778969208.2603672,
+    "timestamp_iso": "2026-05-16T22:06:48Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.create",
+    "slug": "sam_all_test_dpr_opt",
+    "params": {
+      "type": "dpr",
+      "env": "UAT"
+    },
+    "response": {
+      "steps": [
+        {
+          "step": 1,
+          "message": "Created 4 sub-cat widget items",
+          "status": "ok"
+        },
+        {
+          "step": 2,
+          "message": "Created PLP widget: sam_all_test_dpr_opt_plp_w",
+          "status": "ok"
+        },
+        {
+          "step": 3,
+          "message": "Created page layout: sam_all_test_dpr_opt_page_p",
+          "status": "ok"
+        },
+        {
+          "step": 4,
+          "message": "Mapped 4 sub-cats → PLP widget",
+          "status": "ok"
+        },
+        {
+          "step": 5,
+          "message": "Mapped PLP → Page layout",
+          "status": "ok"
+        },
+        {
+          "step": 6,
+          "message": "Mapped Page → Global registry",
+          "status": "ok"
+        },
+        {
+          "step": 7,
+          "message": "Created 4 row widget items (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 8,
+          "message": "Created double_product_row_v2 widget: sam_all_test_dpr_opt_spr_opt",
+          "status": "ok"
+        },
+        {
+          "step": 9,
+          "message": "Mapped Row items → SPR widget (state-wise)",
+          "status": "ok"
+        }
+      ],
+      "slug": "sam_all_test_dpr_opt",
+      "status": "deployed",
+      "spr_slug": "sam_all_test_dpr_opt_spr_opt",
+      "plp_slug": "sam_all_test_dpr_opt_plp_w",
+      "page_slug": "sam_all_test_dpr_opt_page_p",
+      "message": "Widget deployed! SPR slug: sam_all_test_dpr_opt_spr_opt"
+    },
+    "status": "success",
+    "error": "",
+    "timestamp": 1778969213.033188,
+    "timestamp_iso": "2026-05-16T22:06:53Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "slug.created",
+    "slug": "sam_all_test_dpr_opt",
+    "params": {
+      "type": "dpr",
+      "states": [
+        "JH",
+        "CG",
+        "WB"
+      ]
+    },
+    "response": {},
+    "status": "logged",
+    "error": "",
+    "timestamp": 1778969213.036005,
+    "timestamp_iso": "2026-05-16T22:06:53Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.create",
+    "slug": "sam_all_test_mm_spr_std",
+    "params": {
+      "type": "spr",
+      "env": "UAT"
+    },
+    "response": {
+      "steps": [
+        {
+          "step": 1,
+          "message": "Created 4 sub-cat widget items",
+          "status": "ok"
+        },
+        {
+          "step": 2,
+          "message": "Created PLP widget: sam_all_test_mm_spr_std_plp_w",
+          "status": "ok"
+        },
+        {
+          "step": 3,
+          "message": "Created page layout: sam_all_test_mm_spr_std_page_p",
+          "status": "ok"
+        },
+        {
+          "step": 4,
+          "message": "Mapped 4 sub-cats → PLP widget",
+          "status": "ok"
+        },
+        {
+          "step": 5,
+          "message": "Mapped PLP → Page layout",
+          "status": "ok"
+        },
+        {
+          "step": 6,
+          "message": "Mapped Page → Global registry",
+          "status": "ok"
+        },
+        {
+          "step": 7,
+          "message": "Created 4 row widget items (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 8,
+          "message": "Image fetch from file:///Users/satyam/Desktop/Personal/ai bot/sam-mcp/test_multimedia.jpg",
+          "status": "failed",
+          "error": "{'error': 'file:///Users/satyam/Desktop/Personal/ai%20bot/sam-mcp/test_multimedia.jpg'}"
+        }
+      ],
+      "slug": "sam_all_test_mm_spr_std",
+      "status": "failed",
+      "error": "Step 8/10 failed: Image fetch from file:///Users/satyam/Desktop/Personal/ai bot/sam-mcp/test_multimedia.jpg — {'error': 'file:///Users/satyam/Desktop/Personal/ai%20bot/sam-mcp/test_multimedia.jpg'}"
+    },
+    "status": "failed",
+    "error": "Step 8/10 failed: Image fetch from file:///Users/satyam/Desktop/Personal/ai bot/sam-mcp/test_multimedia.jpg — {'error': 'file:///Users/satyam/Desktop/Personal/ai%20bot/sam-mcp/test_multimedia.jpg'}",
+    "timestamp": 1778969300.206972,
+    "timestamp_iso": "2026-05-16T22:08:20Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.create",
+    "slug": "sam_all_test_mm_spr_opt",
+    "params": {
+      "type": "spr",
+      "env": "UAT"
+    },
+    "response": {
+      "steps": [
+        {
+          "step": 1,
+          "message": "Created 4 sub-cat widget items",
+          "status": "ok"
+        },
+        {
+          "step": 2,
+          "message": "Created PLP widget: sam_all_test_mm_spr_opt_plp_w",
+          "status": "ok"
+        },
+        {
+          "step": 3,
+          "message": "Created page layout: sam_all_test_mm_spr_opt_page_p",
+          "status": "ok"
+        },
+        {
+          "step": 4,
+          "message": "Mapped 4 sub-cats → PLP widget",
+          "status": "ok"
+        },
+        {
+          "step": 5,
+          "message": "Mapped PLP → Page layout",
+          "status": "ok"
+        },
+        {
+          "step": 6,
+          "message": "Mapped Page → Global registry",
+          "status": "ok"
+        },
+        {
+          "step": 7,
+          "message": "Created 4 row widget items (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 8,
+          "message": "Image fetch from file:///Users/satyam/Desktop/Personal/ai bot/sam-mcp/test_multimedia.jpg",
+          "status": "failed",
+          "error": "{'error': 'file:///Users/satyam/Desktop/Personal/ai%20bot/sam-mcp/test_multimedia.jpg'}"
+        }
+      ],
+      "slug": "sam_all_test_mm_spr_opt",
+      "status": "failed",
+      "error": "Step 8/10 failed: Image fetch from file:///Users/satyam/Desktop/Personal/ai bot/sam-mcp/test_multimedia.jpg — {'error': 'file:///Users/satyam/Desktop/Personal/ai%20bot/sam-mcp/test_multimedia.jpg'}"
+    },
+    "status": "failed",
+    "error": "Step 8/10 failed: Image fetch from file:///Users/satyam/Desktop/Personal/ai bot/sam-mcp/test_multimedia.jpg — {'error': 'file:///Users/satyam/Desktop/Personal/ai%20bot/sam-mcp/test_multimedia.jpg'}",
+    "timestamp": 1778969304.91116,
+    "timestamp_iso": "2026-05-16T22:08:24Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.create",
+    "slug": "sam_all_test_mm_dpr_opt",
+    "params": {
+      "type": "dpr",
+      "env": "UAT"
+    },
+    "response": {
+      "steps": [
+        {
+          "step": 1,
+          "message": "Created 4 sub-cat widget items",
+          "status": "ok"
+        },
+        {
+          "step": 2,
+          "message": "Created PLP widget: sam_all_test_mm_dpr_opt_plp_w",
+          "status": "ok"
+        },
+        {
+          "step": 3,
+          "message": "Created page layout: sam_all_test_mm_dpr_opt_page_p",
+          "status": "ok"
+        },
+        {
+          "step": 4,
+          "message": "Mapped 4 sub-cats → PLP widget",
+          "status": "ok"
+        },
+        {
+          "step": 5,
+          "message": "Mapped PLP → Page layout",
+          "status": "ok"
+        },
+        {
+          "step": 6,
+          "message": "Mapped Page → Global registry",
+          "status": "ok"
+        },
+        {
+          "step": 7,
+          "message": "Created 4 row widget items (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 8,
+          "message": "Image fetch from file:///Users/satyam/Desktop/Personal/ai bot/sam-mcp/test_multimedia.jpg",
+          "status": "failed",
+          "error": "{'error': 'file:///Users/satyam/Desktop/Personal/ai%20bot/sam-mcp/test_multimedia.jpg'}"
+        }
+      ],
+      "slug": "sam_all_test_mm_dpr_opt",
+      "status": "failed",
+      "error": "Step 8/10 failed: Image fetch from file:///Users/satyam/Desktop/Personal/ai bot/sam-mcp/test_multimedia.jpg — {'error': 'file:///Users/satyam/Desktop/Personal/ai%20bot/sam-mcp/test_multimedia.jpg'}"
+    },
+    "status": "failed",
+    "error": "Step 8/10 failed: Image fetch from file:///Users/satyam/Desktop/Personal/ai bot/sam-mcp/test_multimedia.jpg — {'error': 'file:///Users/satyam/Desktop/Personal/ai%20bot/sam-mcp/test_multimedia.jpg'}",
+    "timestamp": 1778969309.390254,
+    "timestamp_iso": "2026-05-16T22:08:29Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.create",
+    "slug": "sam_mm_spr_std",
+    "params": {
+      "type": "spr",
+      "env": "UAT"
+    },
+    "response": {
+      "steps": [
+        {
+          "step": 1,
+          "message": "Created 4 sub-cat widget items",
+          "status": "ok"
+        },
+        {
+          "step": 2,
+          "message": "Created PLP widget: sam_mm_spr_std_plp_w",
+          "status": "ok"
+        },
+        {
+          "step": 3,
+          "message": "Created page layout: sam_mm_spr_std_page_p",
+          "status": "ok"
+        },
+        {
+          "step": 4,
+          "message": "Mapped 4 sub-cats → PLP widget",
+          "status": "ok"
+        },
+        {
+          "step": 5,
+          "message": "Mapped PLP → Page layout",
+          "status": "ok"
+        },
+        {
+          "step": 6,
+          "message": "Mapped Page → Global registry",
+          "status": "ok"
+        },
+        {
+          "step": 7,
+          "message": "Created 4 row widget items (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 8,
+          "message": "Uploaded multimedia background: sam_mm_spr_std_bg",
+          "status": "ok"
+        },
+        {
+          "step": 9,
+          "message": "Created multimedia_single_product_row widget: sam_mm_spr_std_spr",
+          "status": "ok"
+        },
+        {
+          "step": 10,
+          "message": "Mapped Row items → SPR widget (state-wise)",
+          "status": "ok"
+        }
+      ],
+      "slug": "sam_mm_spr_std",
+      "status": "deployed",
+      "spr_slug": "sam_mm_spr_std_spr",
+      "plp_slug": "sam_mm_spr_std_plp_w",
+      "page_slug": "sam_mm_spr_std_page_p",
+      "message": "Widget deployed! SPR slug: sam_mm_spr_std_spr"
+    },
+    "status": "success",
+    "error": "",
+    "timestamp": 1778969347.48898,
+    "timestamp_iso": "2026-05-16T22:09:07Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "slug.created",
+    "slug": "sam_mm_spr_std",
+    "params": {
+      "type": "spr",
+      "states": [
+        "JH",
+        "CG",
+        "WB"
+      ]
+    },
+    "response": {},
+    "status": "logged",
+    "error": "",
+    "timestamp": 1778969347.4914172,
+    "timestamp_iso": "2026-05-16T22:09:07Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.create",
+    "slug": "sam_mm_spr_opt",
+    "params": {
+      "type": "spr",
+      "env": "UAT"
+    },
+    "response": {
+      "steps": [
+        {
+          "step": 1,
+          "message": "Created 4 sub-cat widget items",
+          "status": "ok"
+        },
+        {
+          "step": 2,
+          "message": "Created PLP widget: sam_mm_spr_opt_plp_w",
+          "status": "ok"
+        },
+        {
+          "step": 3,
+          "message": "Created page layout: sam_mm_spr_opt_page_p",
+          "status": "ok"
+        },
+        {
+          "step": 4,
+          "message": "Mapped 4 sub-cats → PLP widget",
+          "status": "ok"
+        },
+        {
+          "step": 5,
+          "message": "Mapped PLP → Page layout",
+          "status": "ok"
+        },
+        {
+          "step": 6,
+          "message": "Mapped Page → Global registry",
+          "status": "ok"
+        },
+        {
+          "step": 7,
+          "message": "Created 4 row widget items (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 8,
+          "message": "Uploaded multimedia background: sam_mm_spr_opt_bg",
+          "status": "ok"
+        },
+        {
+          "step": 9,
+          "message": "Created multimedia_single_product_row_v2 widget: sam_mm_spr_opt_spr_opt",
+          "status": "ok"
+        },
+        {
+          "step": 10,
+          "message": "Mapped Row items → SPR widget (state-wise)",
+          "status": "ok"
+        }
+      ],
+      "slug": "sam_mm_spr_opt",
+      "status": "deployed",
+      "spr_slug": "sam_mm_spr_opt_spr_opt",
+      "plp_slug": "sam_mm_spr_opt_plp_w",
+      "page_slug": "sam_mm_spr_opt_page_p",
+      "message": "Widget deployed! SPR slug: sam_mm_spr_opt_spr_opt"
+    },
+    "status": "success",
+    "error": "",
+    "timestamp": 1778969353.642315,
+    "timestamp_iso": "2026-05-16T22:09:13Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "slug.created",
+    "slug": "sam_mm_spr_opt",
+    "params": {
+      "type": "spr",
+      "states": [
+        "JH",
+        "CG",
+        "WB"
+      ]
+    },
+    "response": {},
+    "status": "logged",
+    "error": "",
+    "timestamp": 1778969353.645312,
+    "timestamp_iso": "2026-05-16T22:09:13Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.create",
+    "slug": "sam_mm_dpr_opt",
+    "params": {
+      "type": "dpr",
+      "env": "UAT"
+    },
+    "response": {
+      "steps": [
+        {
+          "step": 1,
+          "message": "Created 4 sub-cat widget items",
+          "status": "ok"
+        },
+        {
+          "step": 2,
+          "message": "Created PLP widget: sam_mm_dpr_opt_plp_w",
+          "status": "ok"
+        },
+        {
+          "step": 3,
+          "message": "Created page layout: sam_mm_dpr_opt_page_p",
+          "status": "ok"
+        },
+        {
+          "step": 4,
+          "message": "Mapped 4 sub-cats → PLP widget",
+          "status": "ok"
+        },
+        {
+          "step": 5,
+          "message": "Mapped PLP → Page layout",
+          "status": "ok"
+        },
+        {
+          "step": 6,
+          "message": "Mapped Page → Global registry",
+          "status": "ok"
+        },
+        {
+          "step": 7,
+          "message": "Created 4 row widget items (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 8,
+          "message": "Uploaded multimedia background: sam_mm_dpr_opt_bg",
+          "status": "ok"
+        },
+        {
+          "step": 9,
+          "message": "SPR widget sam_mm_dpr_opt_spr_opt",
+          "status": "failed",
+          "error": "{'error': '\"multimedia_double_product_row_v2\" is not a valid choice.'}"
+        }
+      ],
+      "slug": "sam_mm_dpr_opt",
+      "status": "failed",
+      "error": "Step 9/10 failed: SPR widget sam_mm_dpr_opt_spr_opt — {'error': '\"multimedia_double_product_row_v2\" is not a valid choice.'}"
+    },
+    "status": "failed",
+    "error": "Step 9/10 failed: SPR widget sam_mm_dpr_opt_spr_opt — {'error': '\"multimedia_double_product_row_v2\" is not a valid choice.'}",
+    "timestamp": 1778969358.812015,
+    "timestamp_iso": "2026-05-16T22:09:18Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.create",
+    "slug": "sam_mm_spr_std_prod",
+    "params": {
+      "type": "spr",
+      "env": "PROD"
+    },
+    "response": {
+      "steps": [
+        {
+          "step": 1,
+          "message": "Created 4 sub-cat widget items",
+          "status": "ok"
+        },
+        {
+          "step": 2,
+          "message": "Created PLP widget: sam_mm_spr_std_prod_plp_w",
+          "status": "ok"
+        },
+        {
+          "step": 3,
+          "message": "Created page layout: sam_mm_spr_std_prod_page_p",
+          "status": "ok"
+        },
+        {
+          "step": 4,
+          "message": "Mapped 4 sub-cats → PLP widget",
+          "status": "ok"
+        },
+        {
+          "step": 5,
+          "message": "Mapped PLP → Page layout",
+          "status": "ok"
+        },
+        {
+          "step": 6,
+          "message": "Mapped Page → Global registry",
+          "status": "ok"
+        },
+        {
+          "step": 7,
+          "message": "Created 4 row widget items (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 8,
+          "message": "Uploaded multimedia background: sam_mm_spr_std_prod_bg",
+          "status": "ok"
+        },
+        {
+          "step": 9,
+          "message": "Created multimedia_single_product_row widget: sam_mm_spr_std_prod_spr",
+          "status": "ok"
+        },
+        {
+          "step": 10,
+          "message": "Mapped Row items → SPR widget (state-wise)",
+          "status": "ok"
+        }
+      ],
+      "slug": "sam_mm_spr_std_prod",
+      "status": "deployed",
+      "spr_slug": "sam_mm_spr_std_prod_spr",
+      "plp_slug": "sam_mm_spr_std_prod_plp_w",
+      "page_slug": "sam_mm_spr_std_prod_page_p",
+      "message": "Widget deployed! SPR slug: sam_mm_spr_std_prod_spr"
+    },
+    "status": "success",
+    "error": "",
+    "timestamp": 1778969690.354358,
+    "timestamp_iso": "2026-05-16T22:14:50Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "slug.created",
+    "slug": "sam_mm_spr_std_prod",
+    "params": {
+      "type": "spr",
+      "states": [
+        "JH",
+        "CG",
+        "WB"
+      ]
+    },
+    "response": {},
+    "status": "logged",
+    "error": "",
+    "timestamp": 1778969690.357167,
+    "timestamp_iso": "2026-05-16T22:14:50Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.create",
+    "slug": "sam_banner_test",
+    "params": {
+      "type": "banner_scroll",
+      "env": "UAT"
+    },
+    "response": {
+      "steps": [
+        {
+          "step": 1,
+          "message": "Created 4 sub-cat widget items (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 2,
+          "message": "Created PLP widget: sam_banner_test_plp_w",
+          "status": "ok"
+        },
+        {
+          "step": 3,
+          "message": "Created page layout: sam_banner_test_Page_p",
+          "status": "ok"
+        },
+        {
+          "step": 4,
+          "message": "Created 4 carousel widget items (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 5,
+          "message": "Created carousel widget: sam_banner_test_Cl_w_HP",
+          "status": "ok"
+        },
+        {
+          "step": 6,
+          "message": "Mapped PLP → Page layout",
+          "status": "ok"
+        },
+        {
+          "step": 7,
+          "message": "Mapped 4 Sub-Cats → PLP widget (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 8,
+          "message": "Mapped 4 Carousel Items → Carousel Widget (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 9,
+          "message": "Mapped Page → Global registry",
+          "status": "ok"
+        }
+      ],
+      "slug": "sam_banner_test",
+      "status": "deployed",
+      "carousel_slug": "sam_banner_test_Cl_w_HP",
+      "plp_slug": "sam_banner_test_plp_w",
+      "page_slug": "sam_banner_test_Page_p",
+      "message": "Banner Carousel deployed! Slug: sam_banner_test_Cl_w_HP"
+    },
+    "status": "success",
+    "error": "",
+    "timestamp": 1778969997.893204,
+    "timestamp_iso": "2026-05-16T22:19:57Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "slug.created",
+    "slug": "sam_banner_test",
+    "params": {
+      "type": "banner_scroll",
+      "states": [
+        "JH",
+        "CG",
+        "WB"
+      ]
+    },
+    "response": {},
+    "status": "logged",
+    "error": "",
+    "timestamp": 1778969997.895995,
+    "timestamp_iso": "2026-05-16T22:19:57Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.create",
+    "slug": "sam_banner_v2",
+    "params": {
+      "type": "banner_scroll",
+      "env": "UAT"
+    },
+    "response": {
+      "steps": [
+        {
+          "step": 1,
+          "message": "Created 4 sub-cat widget items (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 2,
+          "message": "Created PLP widget: sam_banner_v2_plp_w",
+          "status": "ok"
+        },
+        {
+          "step": 3,
+          "message": "Created page layout: sam_banner_v2_Page_p",
+          "status": "ok"
+        },
+        {
+          "step": 4,
+          "message": "Created 4 carousel widget items (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 5,
+          "message": "Created carousel widget: sam_banner_v2_Cl_w_HP",
+          "status": "ok"
+        },
+        {
+          "step": 6,
+          "message": "Mapped PLP → Page layout",
+          "status": "ok"
+        },
+        {
+          "step": 7,
+          "message": "Mapped 4 Sub-Cats → PLP widget (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 8,
+          "message": "Mapped 4 Carousel Items → Carousel Widget (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 9,
+          "message": "Mapped Page → Global registry",
+          "status": "ok"
+        }
+      ],
+      "slug": "sam_banner_v2",
+      "status": "deployed",
+      "carousel_slug": "sam_banner_v2_Cl_w_HP",
+      "plp_slug": "sam_banner_v2_plp_w",
+      "page_slug": "sam_banner_v2_Page_p",
+      "message": "Banner Carousel deployed! Slug: sam_banner_v2_Cl_w_HP"
+    },
+    "status": "success",
+    "error": "",
+    "timestamp": 1779045449.404995,
+    "timestamp_iso": "2026-05-17T19:17:29Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "slug.created",
+    "slug": "sam_banner_v2",
+    "params": {
+      "type": "banner_scroll",
+      "states": [
+        "JH",
+        "CG",
+        "WB"
+      ]
+    },
+    "response": {},
+    "status": "logged",
+    "error": "",
+    "timestamp": 1779045449.407007,
+    "timestamp_iso": "2026-05-17T19:17:29Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.create",
+    "slug": "sam_sugar_banner_v1",
+    "params": {
+      "type": "banner_scroll",
+      "env": "UAT"
+    },
+    "response": {
+      "steps": [
+        {
+          "step": 1,
+          "message": "Created 4 sub-cat widget items (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 2,
+          "message": "Created PLP widget: sam_sugar_banner_v1_plp_w",
+          "status": "ok"
+        },
+        {
+          "step": 3,
+          "message": "Created page layout: sam_sugar_banner_v1_Page_p",
+          "status": "ok"
+        },
+        {
+          "step": 4,
+          "message": "Created 4 carousel widget items (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 5,
+          "message": "Created carousel widget: sam_sugar_banner_v1_Cl_w_HP",
+          "status": "ok"
+        },
+        {
+          "step": 6,
+          "message": "Mapped PLP → Page layout",
+          "status": "ok"
+        },
+        {
+          "step": 7,
+          "message": "Mapped 4 Sub-Cats → PLP widget (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 8,
+          "message": "Mapped 4 Carousel Items → Carousel Widget (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 9,
+          "message": "Mapped Page → Global registry",
+          "status": "ok"
+        }
+      ],
+      "slug": "sam_sugar_banner_v1",
+      "status": "deployed",
+      "carousel_slug": "sam_sugar_banner_v1_Cl_w_HP",
+      "plp_slug": "sam_sugar_banner_v1_plp_w",
+      "page_slug": "sam_sugar_banner_v1_Page_p",
+      "message": "Banner Carousel deployed! Slug: sam_sugar_banner_v1_Cl_w_HP"
+    },
+    "status": "success",
+    "error": "",
+    "timestamp": 1779046582.224614,
+    "timestamp_iso": "2026-05-17T19:36:22Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "slug.created",
+    "slug": "sam_sugar_banner_v1",
+    "params": {
+      "type": "banner_scroll",
+      "states": [
+        "JH",
+        "CG",
+        "WB"
+      ]
+    },
+    "response": {},
+    "status": "logged",
+    "error": "",
+    "timestamp": 1779046582.22799,
+    "timestamp_iso": "2026-05-17T19:36:22Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.create",
+    "slug": "sam_hindi_test_spr",
+    "params": {
+      "type": "spr",
+      "env": "UAT"
+    },
+    "response": {
+      "steps": [
+        {
+          "step": 1,
+          "message": "Created 3 sub-cat widget items",
+          "status": "ok"
+        },
+        {
+          "step": 2,
+          "message": "Created PLP widget: sam_hindi_test_spr_plp_w",
+          "status": "ok"
+        },
+        {
+          "step": 3,
+          "message": "Created page layout: sam_hindi_test_spr_page_p",
+          "status": "ok"
+        },
+        {
+          "step": 4,
+          "message": "Mapped 3 sub-cats → PLP widget",
+          "status": "ok"
+        },
+        {
+          "step": 5,
+          "message": "Mapped PLP → Page layout",
+          "status": "ok"
+        },
+        {
+          "step": 6,
+          "message": "Mapped Page → Global registry",
+          "status": "ok"
+        },
+        {
+          "step": 7,
+          "message": "Created 3 row widget items (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 8,
+          "message": "Created single_product_row_v2 widget: sam_hindi_test_spr_spr_opt",
+          "status": "ok"
+        },
+        {
+          "step": 9,
+          "message": "Mapped Row items → SPR widget (state-wise)",
+          "status": "ok"
+        }
+      ],
+      "slug": "sam_hindi_test_spr",
+      "status": "deployed",
+      "spr_slug": "sam_hindi_test_spr_spr_opt",
+      "plp_slug": "sam_hindi_test_spr_plp_w",
+      "page_slug": "sam_hindi_test_spr_page_p",
+      "message": "Widget deployed! SPR slug: sam_hindi_test_spr_spr_opt"
+    },
+    "status": "success",
+    "error": "",
+    "timestamp": 1779080892.46401,
+    "timestamp_iso": "2026-05-18T05:08:12Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "slug.created",
+    "slug": "sam_hindi_test_spr",
+    "params": {
+      "type": "spr",
+      "states": [
+        "JH",
+        "CG"
+      ]
+    },
+    "response": {},
+    "status": "logged",
+    "error": "",
+    "timestamp": 1779080892.466866,
+    "timestamp_iso": "2026-05-18T05:08:12Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.create",
+    "slug": "sam_hindi_test_banner",
+    "params": {
+      "type": "banner_scroll",
+      "env": "UAT"
+    },
+    "response": {
+      "steps": [
+        {
+          "step": 1,
+          "message": "Created 2 sub-cat widget items (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 2,
+          "message": "Created PLP widget: sam_hindi_test_banner_plp_w",
+          "status": "ok"
+        },
+        {
+          "step": 3,
+          "message": "Created page layout: sam_hindi_test_banner_Page_p",
+          "status": "ok"
+        },
+        {
+          "step": 4,
+          "message": "Created 2 carousel widget items (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 5,
+          "message": "Created carousel widget: sam_hindi_test_banner_Cl_w_HP",
+          "status": "ok"
+        },
+        {
+          "step": 6,
+          "message": "Mapped PLP → Page layout",
+          "status": "ok"
+        },
+        {
+          "step": 7,
+          "message": "Mapped 2 Sub-Cats → PLP widget (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 8,
+          "message": "Mapped 2 Carousel Items → Carousel Widget (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 9,
+          "message": "Mapped Page → Global registry",
+          "status": "ok"
+        }
+      ],
+      "slug": "sam_hindi_test_banner",
+      "status": "deployed",
+      "carousel_slug": "sam_hindi_test_banner_Cl_w_HP",
+      "plp_slug": "sam_hindi_test_banner_plp_w",
+      "page_slug": "sam_hindi_test_banner_Page_p",
+      "message": "Banner Carousel deployed! Slug: sam_hindi_test_banner_Cl_w_HP"
+    },
+    "status": "success",
+    "error": "",
+    "timestamp": 1779080899.713314,
+    "timestamp_iso": "2026-05-18T05:08:19Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "slug.created",
+    "slug": "sam_hindi_test_banner",
+    "params": {
+      "type": "banner_scroll",
+      "states": [
+        "JH"
+      ]
+    },
+    "response": {},
+    "status": "logged",
+    "error": "",
+    "timestamp": 1779080899.716553,
+    "timestamp_iso": "2026-05-18T05:08:19Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.create",
+    "slug": "sam_catgrid_test_v1",
+    "params": {
+      "type": "banner_stick",
+      "env": "UAT"
+    },
+    "response": {
+      "steps": [
+        {
+          "step": 1,
+          "message": "Created 4 sub-cat widget items (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 2,
+          "message": "Created PLP widget: sam_catgrid_test_v1_plp_w",
+          "status": "ok"
+        },
+        {
+          "step": 3,
+          "message": "Created page layout: sam_catgrid_test_v1_Page_p",
+          "status": "ok"
+        },
+        {
+          "step": 4,
+          "message": "Category item sam_catgrid_test_v1_cat_wi_global",
+          "status": "failed",
+          "error": "{'error': 'Text needs to be provided for selected Item Type'}"
+        }
+      ],
+      "slug": "sam_catgrid_test_v1",
+      "status": "failed",
+      "error": "Step 4/9 failed: Category item sam_catgrid_test_v1_cat_wi_global — {'error': 'Text needs to be provided for selected Item Type'}"
+    },
+    "status": "failed",
+    "error": "Step 4/9 failed: Category item sam_catgrid_test_v1_cat_wi_global — {'error': 'Text needs to be provided for selected Item Type'}",
+    "timestamp": 1779081456.63856,
+    "timestamp_iso": "2026-05-18T05:17:36Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.create",
+    "slug": "sam_catgrid_test_v2",
+    "params": {
+      "type": "banner_stick",
+      "env": "UAT"
+    },
+    "response": {
+      "steps": [
+        {
+          "step": 1,
+          "message": "Created 4 sub-cat widget items (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 2,
+          "message": "Created PLP widget: sam_catgrid_test_v2_plp_w",
+          "status": "ok"
+        },
+        {
+          "step": 3,
+          "message": "Created page layout: sam_catgrid_test_v2_Page_p",
+          "status": "ok"
+        },
+        {
+          "step": 4,
+          "message": "Created 4 category widget items (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 5,
+          "message": "Created category grid widget: sam_catgrid_test_v2_cm_hp",
+          "status": "ok"
+        },
+        {
+          "step": 6,
+          "message": "Mapped PLP → Page layout",
+          "status": "ok"
+        },
+        {
+          "step": 7,
+          "message": "Mapped 4 Sub-Cats → PLP widget (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 8,
+          "message": "Mapped 4 Category Items → Category Widget (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 9,
+          "message": "Mapped Page → Global registry",
+          "status": "ok"
+        }
+      ],
+      "slug": "sam_catgrid_test_v2",
+      "status": "deployed",
+      "category_slug": "sam_catgrid_test_v2_cm_hp",
+      "plp_slug": "sam_catgrid_test_v2_plp_w",
+      "page_slug": "sam_catgrid_test_v2_Page_p",
+      "message": "Category Grid deployed! Slug: sam_catgrid_test_v2_cm_hp"
+    },
+    "status": "success",
+    "error": "",
+    "timestamp": 1779081509.627394,
+    "timestamp_iso": "2026-05-18T05:18:29Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "slug.created",
+    "slug": "sam_catgrid_test_v2",
+    "params": {
+      "type": "banner_stick",
+      "states": [
+        "JH",
+        "CG",
+        "WB"
+      ]
+    },
+    "response": {},
+    "status": "logged",
+    "error": "",
+    "timestamp": 1779081509.6288068,
+    "timestamp_iso": "2026-05-18T05:18:29Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.create",
+    "slug": "sam_pm_test",
+    "params": {
+      "type": "primary_masthead",
+      "env": "UAT"
+    },
+    "response": {
+      "steps": [
+        {
+          "step": 1,
+          "message": "Uploaded multimedia: sam_pm_test_bg",
+          "status": "ok"
+        },
+        {
+          "step": 2,
+          "message": "Created Primary Masthead: sam_pm_test_pm_hp",
+          "status": "ok"
+        }
+      ],
+      "slug": "sam_pm_test",
+      "status": "deployed",
+      "masthead_slug": "sam_pm_test_pm_hp",
+      "message": "Primary Masthead deployed! Slug: sam_pm_test_pm_hp"
+    },
+    "status": "success",
+    "error": "",
+    "timestamp": 1779082304.741872,
+    "timestamp_iso": "2026-05-18T05:31:44Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "slug.created",
+    "slug": "sam_pm_test",
+    "params": {
+      "type": "primary_masthead",
+      "states": [
+        "JH"
+      ]
+    },
+    "response": {},
+    "status": "logged",
+    "error": "",
+    "timestamp": 1779082304.743236,
+    "timestamp_iso": "2026-05-18T05:31:44Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.create",
+    "slug": "sam_sm_test",
+    "params": {
+      "type": "secondary_masthead",
+      "env": "UAT"
+    },
+    "response": {
+      "steps": [
+        {
+          "step": 1,
+          "message": "Uploaded multimedia: sam_sm_test_bg",
+          "status": "ok"
+        },
+        {
+          "step": 2,
+          "message": "Created Secondary Masthead: sam_sm_test_sm_hp",
+          "status": "ok"
+        },
+        {
+          "step": 3,
+          "message": "Item 1: Page layout sam_sm_test_item_1_page",
+          "status": "ok"
+        },
+        {
+          "step": 4,
+          "message": "Item 1: PLP widget sam_sm_test_item_1_plp",
+          "status": "ok"
+        },
+        {
+          "step": 5,
+          "message": "Item 1: 3 sub-cats (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 6,
+          "message": "Item 1: All mappings done",
+          "status": "ok"
+        },
+        {
+          "step": 7,
+          "message": "Item 1: Carousel item sam_sm_test_item_1_carousel",
+          "status": "ok"
+        },
+        {
+          "step": 8,
+          "message": "Item 2: Page layout sam_sm_test_item_2_page",
+          "status": "ok"
+        },
+        {
+          "step": 9,
+          "message": "Item 2: PLP widget sam_sm_test_item_2_plp",
+          "status": "ok"
+        },
+        {
+          "step": 10,
+          "message": "Item 2: 2 sub-cats (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 11,
+          "message": "Item 2: All mappings done",
+          "status": "ok"
+        },
+        {
+          "step": 12,
+          "message": "Item 2: Carousel item sam_sm_test_item_2_carousel",
+          "status": "ok"
+        },
+        {
+          "step": 13,
+          "message": "Mapped 2 carousel items → SM widget",
+          "status": "ok"
+        }
+      ],
+      "slug": "sam_sm_test",
+      "status": "deployed",
+      "masthead_slug": "sam_sm_test_sm_hp",
+      "message": "Secondary Masthead deployed! Slug: sam_sm_test_sm_hp"
+    },
+    "status": "success",
+    "error": "",
+    "timestamp": 1779082323.431434,
+    "timestamp_iso": "2026-05-18T05:32:03Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "slug.created",
+    "slug": "sam_sm_test",
+    "params": {
+      "type": "secondary_masthead",
+      "states": [
+        "JH",
+        "CG"
+      ]
+    },
+    "response": {},
+    "status": "logged",
+    "error": "",
+    "timestamp": 1779082323.433815,
+    "timestamp_iso": "2026-05-18T05:32:03Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.edit",
+    "slug": "sam_test_spr_v6_spr_opt",
+    "params": {
+      "start_time": "2026-06-01 00:00:00",
+      "end_time": "2026-07-01 00:00:00"
+    },
+    "response": {
+      "error": "PATCH sam_test_spr_v6_spr_opt failed: HTTP 404",
+      "detail": "\n<!doctype html>\n<html lang=\"en\">\n<head>\n  <title>Not Found</title>\n</head>\n<body>\n  <h1>Not Found</h1><p>The requested resource was not found on this server.</p>\n</body>\n</html>\n"
+    },
+    "status": "failed",
+    "error": "",
+    "timestamp": 1779711754.984996,
+    "timestamp_iso": "2026-05-25T12:22:34Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.edit",
+    "slug": "sam_test_spr_v6_spr_opt",
+    "params": {
+      "start_time": "2026-06-01 00:00:00",
+      "end_time": "2026-07-01 00:00:00"
+    },
+    "response": {
+      "error": "name 'slug_name' is not defined"
+    },
+    "status": "failed",
+    "error": "",
+    "timestamp": 1779711794.840128,
+    "timestamp_iso": "2026-05-25T12:23:14Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.edit",
+    "slug": "sam_test_spr_v6_spr_opt",
+    "params": {
+      "heading_en": "Updated SAM SPR Title"
+    },
+    "response": {
+      "error": "name 'slug_name' is not defined"
+    },
+    "status": "failed",
+    "error": "",
+    "timestamp": 1779711795.692013,
+    "timestamp_iso": "2026-05-25T12:23:15Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.edit",
+    "slug": "sam_test_spr_v6_spr_opt",
+    "params": {
+      "start_time": "2026-06-01 00:00:00",
+      "end_time": "2026-07-01 00:00:00"
+    },
+    "response": {
+      "error": "PATCH sam_test_spr_v6_spr_opt (id=1443) failed: HTTP 403",
+      "detail": "{\"error\":\"CSRF Failed: CSRF token from the 'X-Csrftoken' HTTP header incorrect.\"}"
+    },
+    "status": "failed",
+    "error": "",
+    "timestamp": 1779711833.583723,
+    "timestamp_iso": "2026-05-25T12:23:53Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.edit",
+    "slug": "sam_test_spr_v6_spr_opt",
+    "params": {
+      "heading_en": "Updated SAM SPR"
+    },
+    "response": {
+      "error": "PATCH sam_test_spr_v6_spr_opt (id=1443) failed: HTTP 403",
+      "detail": "{\"error\":\"CSRF Failed: CSRF token from the 'X-Csrftoken' HTTP header incorrect.\"}"
+    },
+    "status": "failed",
+    "error": "",
+    "timestamp": 1779711834.4753149,
+    "timestamp_iso": "2026-05-25T12:23:54Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.edit",
+    "slug": "sam_test_spr_v6_spr_opt",
+    "params": {
+      "start_time": "2026-06-01 00:00:00",
+      "end_time": "2026-07-01 00:00:00"
+    },
+    "response": {
+      "error": "PUT widget sam_test_spr_v6_spr_opt (id=1443) failed: HTTP 403",
+      "detail": "{\"error\":\"CSRF Failed: CSRF token from the 'X-Csrftoken' HTTP header incorrect.\"}"
+    },
+    "status": "failed",
+    "error": "",
+    "timestamp": 1779713050.7445672,
+    "timestamp_iso": "2026-05-25T12:44:10Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.edit",
+    "slug": "sam_test_spr_v6_spr_opt",
+    "params": {
+      "start_time": "2026-06-01 00:00:00",
+      "end_time": "2026-07-01 00:00:00"
+    },
+    "response": {
+      "error": "PUT widget sam_test_spr_v6_spr_opt (id=1443) failed: HTTP 403",
+      "detail": "{\"error\":\"CSRF Failed: CSRF token from the 'X-Csrftoken' HTTP header incorrect.\"}"
+    },
+    "status": "failed",
+    "error": "",
+    "timestamp": 1779713083.428915,
+    "timestamp_iso": "2026-05-25T12:44:43Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.edit",
+    "slug": "sam_test_spr_v6_spr_opt",
+    "params": {
+      "heading_en": "Updated SAM SPR Title"
+    },
+    "response": {
+      "error": "PUT widget sam_test_spr_v6_spr_opt (id=1443) failed: HTTP 403",
+      "detail": "{\"error\":\"CSRF Failed: CSRF token from the 'X-Csrftoken' HTTP header incorrect.\"}"
+    },
+    "status": "failed",
+    "error": "",
+    "timestamp": 1779713084.2186,
+    "timestamp_iso": "2026-05-25T12:44:44Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.edit",
+    "slug": "sam_test_spr_v6_spr_opt",
+    "params": {
+      "start_time": "2026-07-01 00:00:00",
+      "end_time": "2026-08-01 00:00:00"
+    },
+    "response": {
+      "status": "updated",
+      "slug": "sam_test_spr_v6_spr_opt",
+      "id": 1443
+    },
+    "status": "success",
+    "error": "",
+    "timestamp": 1779713170.5002491,
+    "timestamp_iso": "2026-05-25T12:46:10Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.edit",
+    "slug": "sam_test_spr_v6_spr_opt",
+    "params": {
+      "heading_en": "SAM Updated Title",
+      "heading_hi": "SAM अपडेट"
+    },
+    "response": {
+      "status": "updated",
+      "slug": "sam_test_spr_v6_spr_opt",
+      "id": 1443
+    },
+    "status": "success",
+    "error": "",
+    "timestamp": 1779713172.053441,
+    "timestamp_iso": "2026-05-25T12:46:12Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget_item.edit",
+    "slug": "test_prod_sam_satyam_pr_wi_jh",
+    "params": {
+      "product_list": "369,370,90513"
+    },
+    "response": {
+      "error": "PUT widget_item test_prod_sam_satyam_pr_wi_jh (id=15753) failed: HTTP 404",
+      "detail": "\n<!doctype html>\n<html lang=\"en\">\n<head>\n  <title>Not Found</title>\n</head>\n<body>\n  <h1>Not Found</h1><p>The requested resource was not found on this server.</p>\n</body>\n</html>\n"
+    },
+    "status": "failed",
+    "error": "",
+    "timestamp": 1779774119.4708931,
+    "timestamp_iso": "2026-05-26T05:41:59Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget_item.edit",
+    "slug": "test_prod_sam_satyam_pr_wi_jh",
+    "params": {
+      "product_list": "369,370,90513"
+    },
+    "response": {
+      "error": "Update widget_item test_prod_sam_satyam_pr_wi_jh (id=15753) failed: HTTP 400",
+      "detail": "{\"error\":\"Text needs to be provided for selected Item Type\"}"
+    },
+    "status": "failed",
+    "error": "",
+    "timestamp": 1779777189.229095,
+    "timestamp_iso": "2026-05-26T06:33:09Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget_item.edit",
+    "slug": "test_prod_sam_satyam_pr_wi_jh",
+    "params": {
+      "product_list": "369,370,90513"
+    },
+    "response": {
+      "error": "Update widget_item test_prod_sam_satyam_pr_wi_jh (id=15753) failed: HTTP 400",
+      "detail": "{\"error\":\"Please provide a valid start time of Widget\"}"
+    },
+    "status": "failed",
+    "error": "",
+    "timestamp": 1779777247.9457002,
+    "timestamp_iso": "2026-05-26T06:34:07Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.edit",
+    "slug": "test_prod_sam_satyam_spr_opt",
+    "params": {
+      "start_time": "2026-06-15 00:00:00",
+      "end_time": "2026-08-15 00:00:00"
+    },
+    "response": {
+      "status": "updated",
+      "slug": "test_prod_sam_satyam_spr_opt",
+      "id": 9389
+    },
+    "status": "success",
+    "error": "",
+    "timestamp": 1779777249.0378082,
+    "timestamp_iso": "2026-05-26T06:34:09Z"
+  }
+]

@@ -1,0 +1,32 @@
+{
+    "super_admin": {
+        "satyam.gupta@apnamart.in": {
+            "name": "Satyam Gupta",
+            "password_plain": "Satyam@546",
+            "projects": [
+                "*"
+            ],
+            "role": "super_admin"
+        }
+    },
+    "users": {
+        "radhika.maheshwari@apnamart.in": {
+            "name": "Radhika Maheshwari",
+            "password_plain": "",
+            "projects": [
+                "homepage_pod"
+            ],
+            "role": "user",
+            "status": "pending_password"
+        },
+        "azeem.namaji@apnamart.in": {
+            "name": "Azeem Namaji",
+            "password_plain": "",
+            "projects": [
+                "homepage_pod"
+            ],
+            "role": "user",
+            "status": "pending_password"
+        }
+    }
+}

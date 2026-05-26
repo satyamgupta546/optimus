@@ -1,0 +1,10 @@
+{
+    "scripts_base_path": "/Users/satyam/Desktop/code/optimus/scripts",
+    "widget_type_to_script": {
+        "spr": "SPR_Optimized_Automation.gs",
+        "banner_scroll": "CLP_Automation.gs",
+        "banner_stick": "Category_Grid_Backend.gs",
+        "primary_masthead": "Primary_Masthead_Automation.gs",
+        "secondary_masthead": "Secondary_Masthead_Backend.gs"
+    }
+}

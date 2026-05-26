@@ -1,0 +1,33 @@
+{
+    "base_url": "https://optimus-app-hazel.vercel.app/api/local",
+    "auth": {
+        "user": "satyam.gupta@apnamart.in",
+        "default_env": "UAT"
+    },
+    "environments": {
+        "PROD": "PROD",
+        "UAT": "UAT"
+    },
+    "headers": {
+        "X-Optimus-User": "satyam.gupta@apnamart.in"
+    },
+    "endpoints": {
+        "widgets": "/widgets",
+        "widget_by_id": "/widgets/{id}",
+        "widget_duplicate": "/widgets/{id}/duplicate",
+        "widget_versions": "/widgets/{id}/versions",
+        "requests": "/requests",
+        "request_approve": "/requests/{id}/approve",
+        "request_reject": "/requests/{id}/reject",
+        "request_reopen": "/requests/{id}/reopen",
+        "catalog_search": "/catalog/search",
+        "catalog_batch": "/catalog/batch",
+        "header_widgets": "/header-widgets",
+        "locations": "/locations",
+        "activity": "/activity",
+        "media_upload": "/media/upload",
+        "kinetic_history": "/kinetic/history",
+        "kinetic_search": "/kinetic/search-widgets"
+    },
+    "rate_limit": 100
+}

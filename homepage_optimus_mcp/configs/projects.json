@@ -1,0 +1,30 @@
+{
+    "projects": {
+        "homepage_pod": {
+            "name": "Homepage Pod",
+            "description": "Homepage widget management — SPR, Banner, Masthead creation/update/bulk upload",
+            "tools": ["sam_widget", "sam_bulk", "sam_catalog", "sam_page", "sam_help"],
+            "samaan_config": "samaan.json",
+            "optimus_config": "optimus.json",
+            "status": "active"
+        },
+        "pricing": {
+            "name": "Pricing",
+            "description": "Price rules, MRP update, SP update, discount management",
+            "tools": [],
+            "status": "planned"
+        },
+        "offer": {
+            "name": "Offer",
+            "description": "Offer creation, coupon management, deal setup",
+            "tools": [],
+            "status": "planned"
+        },
+        "catalog": {
+            "name": "Catalog",
+            "description": "EAN mapping, GST update, product mapping, item management",
+            "tools": [],
+            "status": "planned"
+        }
+    }
+}
