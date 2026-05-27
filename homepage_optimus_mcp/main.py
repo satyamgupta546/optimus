@@ -334,49 +334,32 @@ def create_app():
         lifespan=lifespan,
     )
 
-    # Wrap with ASGI middleware to handle /mcp directly (avoids Starlette Mount trailing-slash redirect)
-    # /mcp requires a valid OAuth Bearer token; responds with 401 + discovery header otherwise.
+    # Wrap with ASGI middleware to handle /mcp directly
+    # OAuth is optional: if Bearer token present → validate; if absent → allow through
+    # This lets Developer config (no OAuth) and Connectors (with OAuth) both work
     async def app(scope, receive, send):
         if scope["type"] == "http" and scope["path"].rstrip("/") == "/mcp":
-            # Build base URL from raw ASGI headers for the WWW-Authenticate header
             raw_headers = dict(scope.get("headers", []))
-            proto = raw_headers.get(b"x-forwarded-proto", b"https").decode()
-            host = (
-                raw_headers.get(b"x-forwarded-host", b"").decode()
-                or raw_headers.get(b"host", b"localhost:8080").decode()
-            )
-            base_url = f"{proto}://{host}"
-
             auth = raw_headers.get(b"authorization", b"").decode()
-            if not auth.startswith("Bearer "):
-                response = JSONResponse(
-                    {"error": "unauthorized", "error_description": "Bearer token required"},
-                    status_code=401,
-                    headers={
-                        "WWW-Authenticate": (
-                            f'Bearer resource_metadata="{base_url}/.well-known/oauth-protected-resource/mcp"'
-                        )
-                    },
-                )
-                await response(scope, receive, send)
-                return
 
-            token = auth[len("Bearer "):]
-            user = validate_oauth_token(token)
-            if not user:
-                response = JSONResponse(
-                    {"error": "invalid_token", "error_description": "Token invalid or expired"},
-                    status_code=401,
-                    headers={
-                        "WWW-Authenticate": (
-                            f'Bearer resource_metadata="{base_url}/.well-known/oauth-protected-resource/mcp",'
-                            ' error="invalid_token"'
-                        )
-                    },
-                )
-                await response(scope, receive, send)
-                return
+            # If Bearer token provided, validate it
+            if auth.startswith("Bearer "):
+                token = auth[len("Bearer "):]
+                user = validate_oauth_token(token)
+                if not user:
+                    proto = raw_headers.get(b"x-forwarded-proto", b"https").decode()
+                    host = (raw_headers.get(b"x-forwarded-host", b"").decode()
+                            or raw_headers.get(b"host", b"localhost:8080").decode())
+                    base_url = f"{proto}://{host}"
+                    response = JSONResponse(
+                        {"error": "invalid_token", "error_description": "Token invalid or expired"},
+                        status_code=401,
+                        headers={"WWW-Authenticate": f'Bearer resource_metadata="{base_url}/.well-known/oauth-protected-resource/mcp", error="invalid_token"'},
+                    )
+                    await response(scope, receive, send)
+                    return
 
+            # Allow through — with or without token
             await session_manager.handle_request(scope, receive, send)
             return
 
