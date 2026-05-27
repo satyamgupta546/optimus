@@ -1,5 +1,7 @@
 /**
- * WidgetDataService — All Supabase (PostgreSQL) data access.
+ * WidgetDataService — All BigQuery data access.
+ *
+ * Migrated from Supabase to BigQuery (apna-mart-data.optimus).
  *
  * Data layer for:
  * - Auth (user_roles table, cached)
@@ -9,7 +11,7 @@
  * - Locations (locations table)
  * - Products (Metabase API)
  */
-import { getClient } from './SupabaseService.js';
+import * as BQ from './BigQueryService.js';
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
@@ -69,19 +71,13 @@ export async function resolveUser(email, env) {
   let role = 'MAKER';
   let name = lowerEmail.split('@')[0];
   try {
-    const sb = getClient();
-    const { data } = await sb
-      .from('user_roles')
-      .select('role, name')
-      .eq('email', lowerEmail)
-      .eq('env', env)
-      .eq('is_active', true)
-      .limit(1)
-      .single();
-
-    if (data?.role === 'CHECKER') {
+    const rows = await BQ.selectRows('user_roles', {
+      where: `email = '${BQ.esc(lowerEmail)}' AND env = '${BQ.esc(env)}' AND is_active = TRUE`,
+      limit: 1,
+    });
+    if (rows.length > 0 && rows[0].role === 'CHECKER') {
       role = 'CHECKER';
-      name = data.name || name;
+      name = rows[0].name || name;
     }
   } catch {
     // Graceful degradation
@@ -126,45 +122,39 @@ function parseWidget(row) {
 }
 
 export async function listWidgets(env, { status, type, slug, date } = {}) {
-  const sb = getClient();
-  let query = sb
-    .from('canvas_widgets')
-    .select('*')
-    .eq('is_deleted', false)
-    .eq('env', env)
-    .not('type', 'in', '("primaryMasthead","secondaryMasthead")')
-    .order('sort_order', { ascending: true })
-    .limit(500);
-
-  if (status) query = query.eq('status', status);
-  if (type) query = query.eq('type', type);
-  if (slug) query = query.eq('slug', slug);
+  const conditions = [
+    `is_deleted = FALSE`,
+    `env = '${BQ.esc(env)}'`,
+    `type NOT IN ('primaryMasthead', 'secondaryMasthead')`,
+  ];
+  if (status) conditions.push(`status = '${BQ.esc(status)}'`);
+  if (type) conditions.push(`type = '${BQ.esc(type)}'`);
+  if (slug) conditions.push(`slug = '${BQ.esc(slug)}'`);
   if (date) {
-    query = query.gte('created_at', `${date}T00:00:00`).lt('created_at', `${date}T23:59:59`);
+    conditions.push(`created_at >= '${BQ.esc(date)}T00:00:00'`);
+    conditions.push(`created_at < '${BQ.esc(date)}T23:59:59'`);
   }
 
-  const { data, error } = await query;
-  if (error) throw new Error(`Supabase: ${error.message}`);
-  return (data || []).map(parseWidget);
+  const rows = await BQ.selectRows('canvas_widgets', {
+    where: conditions.join(' AND '),
+    orderBy: 'sort_order ASC',
+    limit: 500,
+  });
+  return rows.map(parseWidget);
 }
 
 export async function getWidgetById(widgetId, env) {
-  const sb = getClient();
-  let query = sb
-    .from('canvas_widgets')
-    .select('*')
-    .eq('widget_id', widgetId)
-    .eq('is_deleted', false);
+  const conditions = [`widget_id = '${BQ.esc(widgetId)}'`, `is_deleted = FALSE`];
+  if (env) conditions.push(`env = '${BQ.esc(env)}'`);
 
-  if (env) query = query.eq('env', env);
-
-  const { data, error } = await query.limit(1).single();
-  if (error && error.code !== 'PGRST116') throw new Error(`Supabase: ${error.message}`);
-  return parseWidget(data);
+  const rows = await BQ.selectRows('canvas_widgets', {
+    where: conditions.join(' AND '),
+    limit: 1,
+  });
+  return rows.length > 0 ? parseWidget(rows[0]) : null;
 }
 
 export async function createWidget(data) {
-  const sb = getClient();
 
   // widget_id priority:
   // 1. Explicitly provided (e.g., from SMApp deploy callback)
@@ -205,18 +195,11 @@ export async function createWidget(data) {
     is_deleted: false,
   };
 
-  const { data: inserted, error } = await sb
-    .from('canvas_widgets')
-    .insert(row)
-    .select()
-    .single();
-
-  if (error) throw new Error(`Supabase: ${error.message}`);
-  return parseWidget(inserted);
+  await BQ.insertRow('canvas_widgets', row);
+  return parseWidget(row);
 }
 
 export async function updateWidget(widgetId, data, env) {
-  const sb = getClient();
   const updates = {};
 
   if (data.type !== undefined) updates.type = data.type;
@@ -229,43 +212,23 @@ export async function updateWidget(widgetId, data, env) {
   if (data.config !== undefined) updates.config = typeof data.config === 'string' ? JSON.parse(data.config) : data.config;
   if (data.products !== undefined) updates.products = typeof data.products === 'string' ? JSON.parse(data.products) : data.products;
 
-  let query = sb
-    .from('canvas_widgets')
-    .update(updates)
-    .eq('widget_id', widgetId)
-    .eq('is_deleted', false);
+  const conditions = [`widget_id = '${BQ.esc(widgetId)}'`, `is_deleted = FALSE`];
+  if (env) conditions.push(`env = '${BQ.esc(env)}'`);
 
-  if (env) query = query.eq('env', env);
-
-  const { data: updated, error } = await query.select().single();
-
-  if (error && error.code !== 'PGRST116') throw new Error(`Supabase: ${error.message}`);
-  return parseWidget(updated);
+  await BQ.updateRows('canvas_widgets', updates, conditions.join(' AND '));
+  return getWidgetById(widgetId, env);
 }
 
 export async function deleteWidget(widgetId, env) {
-  const sb = getClient();
-  let query = sb
-    .from('canvas_widgets')
-    .update({ is_deleted: true })
-    .eq('widget_id', widgetId);
-
-  if (env) query = query.eq('env', env);
-
-  const { error } = await query;
-  if (error) throw new Error(`Supabase: ${error.message}`);
+  const conditions = [`widget_id = '${BQ.esc(widgetId)}'`];
+  if (env) conditions.push(`env = '${BQ.esc(env)}'`);
+  await BQ.updateRows('canvas_widgets', { is_deleted: true }, conditions.join(' AND '));
 }
 
 export async function reorderWidgets(order) {
-  const sb = getClient();
   for (const { id: widgetId, sortOrder } of order) {
-    const { error } = await sb
-      .from('canvas_widgets')
-      .update({ sort_order: sortOrder })
-      .eq('widget_id', widgetId)
-      .eq('is_deleted', false);
-
-    if (error) throw new Error(`Supabase: ${error.message}`);
+    await BQ.updateRows('canvas_widgets', { sort_order: sortOrder },
+      `widget_id = '${BQ.esc(widgetId)}' AND is_deleted = FALSE`);
   }
 }
 
@@ -291,29 +254,18 @@ export async function duplicateWidget(sourceWidgetId, user, env) {
 
 export async function updateWidgetStatuses(widgetIds, status) {
   if (!widgetIds || widgetIds.length === 0) return;
-  const sb = getClient();
-
-  const { error } = await sb
-    .from('canvas_widgets')
-    .update({ status })
-    .in('widget_id', widgetIds)
-    .eq('is_deleted', false);
-
-  if (error) throw new Error(`Supabase: ${error.message}`);
+  const idList = widgetIds.map(id => `'${BQ.esc(id)}'`).join(',');
+  await BQ.updateRows('canvas_widgets', { status },
+    `widget_id IN (${idList}) AND is_deleted = FALSE`);
 }
 
 export async function findWidgetsByIds(widgetIds) {
   if (!widgetIds || widgetIds.length === 0) return [];
-  const sb = getClient();
-
-  const { data, error } = await sb
-    .from('canvas_widgets')
-    .select('*')
-    .in('widget_id', widgetIds)
-    .eq('is_deleted', false);
-
-  if (error) throw new Error(`Supabase: ${error.message}`);
-  return (data || []).map(parseWidget);
+  const idList = widgetIds.map(id => `'${BQ.esc(id)}'`).join(',');
+  const rows = await BQ.selectRows('canvas_widgets', {
+    where: `widget_id IN (${idList}) AND is_deleted = FALSE`,
+  });
+  return rows.map(parseWidget);
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -321,43 +273,31 @@ export async function findWidgetsByIds(widgetIds) {
 // ══════════════════════════════════════════════════════════════
 
 export async function getHeaderWidgets() {
-  const sb = getClient();
-  const { data, error } = await sb
-    .from('canvas_widgets')
-    .select('type, config')
-    .in('type', ['primaryMasthead', 'secondaryMasthead'])
-    .eq('is_deleted', false);
-
-  if (error) throw new Error(`Supabase: ${error.message}`);
+  const rows = await BQ.selectRows('canvas_widgets', {
+    where: `type IN ('primaryMasthead', 'secondaryMasthead') AND is_deleted = FALSE`,
+  });
 
   const headers = { primaryMasthead: null, secondaryMasthead: null };
-  for (const row of (data || [])) {
+  for (const row of rows) {
     headers[row.type] = row.config || null;
   }
   return headers;
 }
 
 export async function upsertHeaderWidget(type, config, email) {
-  const sb = getClient();
-  const { error } = await sb
-    .from('canvas_widgets')
-    .upsert({
-      widget_id: type,
-      type,
-      slug: '',
-      env: 'PROD',
-      title: type,
-      title_hi: '',
-      status: 'APPROVED',
-      sort_order: 0,
-      pnc: {},
-      config,
-      products: [],
-      author: email || '',
-      is_deleted: false,
-    }, { onConflict: 'widget_id' });
-
-  if (error) throw new Error(`Supabase: ${error.message}`);
+  // Check if exists
+  const existing = await getWidgetById(type);
+  if (existing) {
+    await BQ.updateRows('canvas_widgets', { config: JSON.stringify(config), author: email || '' },
+      `widget_id = '${BQ.esc(type)}'`);
+  } else {
+    await BQ.insertRow('canvas_widgets', {
+      widget_id: type, type, slug: '', env: 'PROD', title: type, title_hi: '',
+      status: 'APPROVED', sort_order: 0, pnc: JSON.stringify({}),
+      config: JSON.stringify(config), products: JSON.stringify([]),
+      author: email || '', is_deleted: false,
+    });
+  }
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -380,20 +320,16 @@ function parseVersion(row) {
 }
 
 export async function listVersions(widgetId, { limit = 20, cursor } = {}) {
-  const sb = getClient();
-  let query = sb
-    .from('widget_versions')
-    .select('*')
-    .eq('widget_id', widgetId)
-    .order('version', { ascending: false })
-    .limit(limit);
+  const conditions = [`widget_id = '${BQ.esc(widgetId)}'`];
+  if (cursor) conditions.push(`version < ${parseInt(cursor)}`);
 
-  if (cursor) query = query.lt('version', parseInt(cursor));
+  const rows = await BQ.selectRows('widget_versions', {
+    where: conditions.join(' AND '),
+    orderBy: 'version DESC',
+    limit,
+  });
 
-  const { data, error } = await query;
-  if (error) throw new Error(`Supabase: ${error.message}`);
-
-  const versions = (data || []).map(parseVersion);
+  const versions = rows.map(parseVersion);
   const hasMore = versions.length === limit;
   const nextCursor = hasMore ? versions[versions.length - 1].version : null;
 
@@ -401,47 +337,29 @@ export async function listVersions(widgetId, { limit = 20, cursor } = {}) {
 }
 
 export async function createVersion(data) {
-  const sb = getClient();
+  const snapshot = typeof data.snapshot === 'string' ? data.snapshot : JSON.stringify(data.snapshot || {});
+
   const row = {
     widget_id: data.widgetId,
     widget_slug: data.widgetSlug || '',
     env: data.env || 'PROD',
     version: data.version,
-    snapshot: typeof data.snapshot === 'string' ? JSON.parse(data.snapshot) : (data.snapshot || {}),
+    snapshot,
     changed_by: data.changedBy || '',
     change_log: data.changeLog || '',
   };
 
-  // DB column is NOT auto-increment — generate next id via max+1
-  // Use a retry loop to handle concurrent inserts
-  for (let attempt = 0; attempt < 3; attempt++) {
-    const { data: maxRow } = await sb.from('widget_versions').select('id').order('id', { ascending: false }).limit(1).single();
-    row.id = (maxRow?.id || 0) + 1;
-
-    const { data: inserted, error } = await sb
-      .from('widget_versions')
-      .insert(row)
-      .select()
-      .single();
-
-    if (!error) return parseVersion(inserted);
-    if (error.code === '23505' && attempt < 2) continue; // unique violation — retry
-    throw new Error(`Supabase: ${error.message}`);
-  }
+  await BQ.insertRow('widget_versions', row);
+  return parseVersion(row);
 }
 
 export async function getLatestVersion(widgetId) {
-  const sb = getClient();
-  const { data, error } = await sb
-    .from('widget_versions')
-    .select('*')
-    .eq('widget_id', widgetId)
-    .order('version', { ascending: false })
-    .limit(1)
-    .single();
-
-  if (error && error.code !== 'PGRST116') throw new Error(`Supabase: ${error.message}`);
-  return parseVersion(data);
+  const rows = await BQ.selectRows('widget_versions', {
+    where: `widget_id = '${BQ.esc(widgetId)}'`,
+    orderBy: 'version DESC',
+    limit: 1,
+  });
+  return rows.length > 0 ? parseVersion(rows[0]) : null;
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -449,16 +367,11 @@ export async function getLatestVersion(widgetId) {
 // ══════════════════════════════════════════════════════════════
 
 export async function listCheckers(env) {
-  const sb = getClient();
-  const { data, error } = await sb
-    .from('user_roles')
-    .select('id, email, name, role, added_at')
-    .eq('env', env)
-    .eq('is_active', true)
-    .order('role').order('email');
-
-  if (error) throw new Error(`Supabase: ${error.message}`);
-  return (data || []).map(row => ({
+  const rows = await BQ.selectRows('user_roles', {
+    where: `env = '${BQ.esc(env)}' AND is_active = TRUE`,
+    orderBy: 'role, email',
+  });
+  return rows.map(row => ({
     id: row.id,
     email: row.email,
     name: row.name || row.email.split('@')[0],
@@ -468,53 +381,43 @@ export async function listCheckers(env) {
 }
 
 export async function addChecker(email, name, env, addedBy) {
-  const sb = getClient();
   const lowerEmail = email.toLowerCase();
+  const displayName = name || lowerEmail.split('@')[0];
 
-  const { data, error } = await sb
-    .from('user_roles')
-    .upsert({
-      email: lowerEmail,
-      name: name || lowerEmail.split('@')[0],
-      role: 'CHECKER',
-      env,
-      added_by: addedBy || '',
-      is_active: true,
-    }, { onConflict: 'email,env' })
-    .select()
-    .single();
+  // Check if exists
+  const existing = await BQ.selectRows('user_roles', {
+    where: `email = '${BQ.esc(lowerEmail)}' AND env = '${BQ.esc(env)}'`,
+    limit: 1,
+  });
 
-  if (error) throw new Error(`Supabase: ${error.message}`);
+  if (existing.length > 0) {
+    await BQ.updateRows('user_roles', { is_active: true, name: displayName, added_by: addedBy || '' },
+      `email = '${BQ.esc(lowerEmail)}' AND env = '${BQ.esc(env)}'`);
+  } else {
+    await BQ.insertRow('user_roles', {
+      email: lowerEmail, name: displayName, role: 'CHECKER', env,
+      is_active: true, added_by: addedBy || '',
+    });
+  }
+
   bustUserCache(lowerEmail);
-  return { id: data.id, email: lowerEmail, name: name || lowerEmail.split('@')[0], role: 'CHECKER' };
+  return { email: lowerEmail, name: displayName, role: 'CHECKER' };
 }
 
 export async function removeChecker(email, env) {
-  const sb = getClient();
   const lowerEmail = email.toLowerCase();
-
-  const { error } = await sb
-    .from('user_roles')
-    .update({ is_active: false })
-    .eq('email', lowerEmail)
-    .eq('env', env);
-
-  if (error) throw new Error(`Supabase: ${error.message}`);
+  await BQ.updateRows('user_roles', { is_active: false },
+    `email = '${BQ.esc(lowerEmail)}' AND env = '${BQ.esc(env)}'`);
   bustUserCache(lowerEmail);
 }
 
 export async function isCheckerAnywhere(email) {
-  const sb = getClient();
   const lowerEmail = email.toLowerCase();
-
-  const { data } = await sb
-    .from('user_roles')
-    .select('id')
-    .eq('email', lowerEmail)
-    .eq('is_active', true)
-    .limit(1);
-
-  return (data || []).length > 0;
+  const rows = await BQ.selectRows('user_roles', {
+    where: `email = '${BQ.esc(lowerEmail)}' AND is_active = TRUE`,
+    limit: 1,
+  });
+  return rows.length > 0;
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -539,33 +442,22 @@ function parseLocation(row) {
 }
 
 export async function listLocations(env, enabledOnly = false) {
-  const sb = getClient();
-  let query = sb
-    .from('locations')
-    .select('*')
-    .eq('env', env)
-    .order('is_default', { ascending: false })
-    .order('type').order('label');
+  const conditions = [`env = '${BQ.esc(env)}'`];
+  if (enabledOnly) conditions.push(`is_enabled = TRUE`);
 
-  if (enabledOnly) query = query.eq('is_enabled', true);
-
-  const { data, error } = await query;
-  if (error) throw new Error(`Supabase: ${error.message}`);
-  return (data || []).map(parseLocation);
+  const rows = await BQ.selectRows('locations', {
+    where: conditions.join(' AND '),
+    orderBy: 'is_default DESC, type, label',
+  });
+  return rows.map(parseLocation);
 }
 
 export async function getLocation(key, env) {
-  const sb = getClient();
-  const { data, error } = await sb
-    .from('locations')
-    .select('*')
-    .eq('key', key)
-    .eq('env', env)
-    .limit(1)
-    .single();
-
-  if (error && error.code !== 'PGRST116') throw new Error(`Supabase: ${error.message}`);
-  return parseLocation(data);
+  const rows = await BQ.selectRows('locations', {
+    where: `\`key\` = '${BQ.esc(key)}' AND env = '${BQ.esc(env)}'`,
+    limit: 1,
+  });
+  return rows.length > 0 ? parseLocation(rows[0]) : null;
 }
 
 export async function createLocation(data) {
@@ -574,30 +466,23 @@ export async function createLocation(data) {
     throw Object.assign(new Error(`Location with key "${data.key}" already exists`), { status: 409 });
   }
 
-  const sb = getClient();
-  const { data: inserted, error } = await sb
-    .from('locations')
-    .insert({
-      key: data.key,
-      env: data.env || 'PROD',
-      level_tag: data.levelTag || '',
-      level_property: data.levelProperty || '',
-      slug_suffix: data.slugSuffix || '',
-      label: data.label || '',
-      type: data.type || '',
-      is_default: false,
-      is_enabled: true,
-      is_custom: true,
-    })
-    .select()
-    .single();
-
-  if (error) throw new Error(`Supabase: ${error.message}`);
-  return parseLocation(inserted);
+  const row = {
+    key: data.key,
+    env: data.env || 'PROD',
+    level_tag: data.levelTag || '',
+    level_property: data.levelProperty || '',
+    slug_suffix: data.slugSuffix || '',
+    label: data.label || '',
+    type: data.type || '',
+    is_default: false,
+    is_enabled: true,
+    is_custom: true,
+  };
+  await BQ.insertRow('locations', row);
+  return parseLocation(row);
 }
 
 export async function toggleLocation(key, env) {
-  const sb = getClient();
   const current = await getLocation(key, env);
   if (!current) return null;
 
@@ -606,16 +491,9 @@ export async function toggleLocation(key, env) {
   }
 
   const newEnabled = !current.isEnabled;
-  const { data, error } = await sb
-    .from('locations')
-    .update({ is_enabled: newEnabled })
-    .eq('key', key)
-    .eq('env', env)
-    .select()
-    .single();
-
-  if (error) throw new Error(`Supabase: ${error.message}`);
-  return parseLocation(data);
+  await BQ.updateRows('locations', { is_enabled: newEnabled },
+    `\`key\` = '${BQ.esc(key)}' AND env = '${BQ.esc(env)}'`);
+  return getLocation(key, env);
 }
 
 export async function deleteLocation(key, env) {
@@ -626,14 +504,8 @@ export async function deleteLocation(key, env) {
     throw Object.assign(new Error('Only custom locations can be deleted'), { status: 403 });
   }
 
-  const sb = getClient();
-  const { error } = await sb
-    .from('locations')
-    .update({ is_enabled: false })
-    .eq('key', key)
-    .eq('env', env);
-
-  if (error) throw new Error(`Supabase: ${error.message}`);
+  await BQ.updateRows('locations', { is_enabled: false },
+    `\`key\` = '${BQ.esc(key)}' AND env = '${BQ.esc(env)}'`);
   return true;
 }
 

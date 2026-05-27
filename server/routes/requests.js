@@ -19,7 +19,7 @@ router.get('/', async (req, res, next) => {
     res.json(requests);
   } catch (err) {
     console.error('[requests GET /] Database read failed:', err.message);
-    res.status(502).json({ error: 'Failed to fetch requests from Supabase', details: err.message });
+    res.status(502).json({ error: 'Failed to fetch requests from database', details: err.message });
   }
 });
 
@@ -152,7 +152,7 @@ router.post('/', async (req, res, next) => {
     res.status(201).json(created);
   } catch (err) {
     console.error('[requests POST /] Error:', err.message);
-    if (err.message.startsWith('Supabase')) {
+    if (err.message.includes('BigQuery') || err.message.includes('database')) {
       return res.status(502).json({ error: 'Database write failed', details: err.message });
     }
     next(err);
@@ -206,7 +206,7 @@ router.post('/:id/approve', async (req, res, next) => {
       return res.status(409).json({ error: err.message });
     }
     console.error('[requests POST /:id/approve] Error:', err.message);
-    if (err.message.startsWith('Supabase')) {
+    if (err.message.includes('BigQuery') || err.message.includes('database')) {
       return res.status(502).json({ error: 'Database write failed', details: err.message });
     }
     next(err);
@@ -254,7 +254,7 @@ router.post('/:id/reject', async (req, res, next) => {
       return res.status(409).json({ error: err.message });
     }
     console.error('[requests POST /:id/reject] Error:', err.message);
-    if (err.message.startsWith('Supabase')) {
+    if (err.message.includes('BigQuery') || err.message.includes('database')) {
       return res.status(502).json({ error: 'Database write failed', details: err.message });
     }
     next(err);
@@ -291,7 +291,7 @@ router.post('/:id/reopen', async (req, res, next) => {
     res.json({ id: req.params.id, status: 'PENDING', updatedAt: new Date().toISOString() });
   } catch (err) {
     console.error('[requests POST /:id/reopen] Error:', err.message);
-    if (err.message.startsWith('Supabase')) {
+    if (err.message.includes('BigQuery') || err.message.includes('database')) {
       return res.status(502).json({ error: 'Database write failed', details: err.message });
     }
     next(err);

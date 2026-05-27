@@ -1,8 +1,7 @@
 /**
- * SubmissionService — Submissions via Supabase.
+ * SubmissionService — Submissions via BigQuery.
  *
- * Single table: submissions (SERIAL id, history JSONB for audit trail)
- * No separate activity_log table.
+ * Migrated from Supabase to BigQuery (apna-mart-data.optimus.submissions).
  *
  * Operations:
  *   1. createSubmission()    — on submit (PENDING)
@@ -12,7 +11,7 @@
  *   5. fetchRequests()       — list requests
  *   6. fetchRequestById()    — get single request
  */
-import { getClient } from './SupabaseService.js';
+import * as BQ from './BigQueryService.js';
 import { deriveSmappSlug, stripSlugSuffix } from './WidgetDataService.js';
 import fs from 'fs';
 import path from 'path';
@@ -42,17 +41,13 @@ try {
 async function lookupWidgetIdBySlug(slug) {
   if (!slug) return null;
 
-  // 1. Check our own DB first
+  // 1. Check BQ first
   try {
-    const sb = getClient();
-    const { data } = await sb
-      .from('canvas_widgets')
-      .select('widget_id')
-      .eq('slug', slug)
-      .eq('is_deleted', false)
-      .limit(1)
-      .single();
-    if (data?.widget_id) return data.widget_id;
+    const rows = await BQ.selectRows('canvas_widgets', {
+      where: `slug = '${BQ.esc(slug)}' AND is_deleted = FALSE`,
+      limit: 1,
+    });
+    if (rows.length > 0 && rows[0].widget_id) return rows[0].widget_id;
   } catch { /* not found locally */ }
 
   // 2. Fallback: lookup from SMApp via Metabase
@@ -68,14 +63,12 @@ async function lookupWidgetIdBySlug(slug) {
  * Get next request_id from PostgreSQL sequence.
  */
 async function nextRequestId() {
-  const sb = getClient();
-  const { data, error } = await sb.rpc('nextval_request_id');
-  if (error) {
-    // Fallback: use max(request_id) + 1
-    const { data: rows } = await sb.from('submissions').select('request_id').order('request_id', { ascending: false }).limit(1);
-    return ((rows?.[0]?.request_id) || 0) + 1;
+  try {
+    const rows = await BQ.query(`SELECT MAX(request_id) as max_id FROM \`apna-mart-data.optimus.submissions\``);
+    return (rows[0]?.max_id || 0) + 1;
+  } catch {
+    return Date.now(); // Fallback
   }
-  return data;
 }
 
 // ── Helpers ──
@@ -170,7 +163,6 @@ function deriveHierarchy(w) {
 // ══════════════════════════════════════════════════════════════
 
 export async function createSubmission(requestIdOverride, widgets, user, env, headerWidgets = {}) {
-  const sb = getClient();
   const now = new Date().toISOString();
   const requestId = requestIdOverride || await nextRequestId();
 
@@ -244,32 +236,19 @@ export async function createSubmission(requestIdOverride, widgets, user, env, he
   }
 
   console.log(`[Submission] Creating: ${rows.length} widget(s) for request ${requestId}`);
-  const { data: inserted, error } = await sb.from('submissions').insert(rows).select('id, widget_id, slug, env, widget_type, title, pnc, config, hierarchy');
-  if (error) throw new Error(`Supabase: ${error.message}`);
 
-  // Also create matching widget_versions
-  // Need to generate IDs since column is not auto-increment
-  if ((inserted || []).some(r => r.widget_id)) {
-    try {
-      const { data: maxRow } = await sb.from('widget_versions').select('id').order('id', { ascending: false }).limit(1).single();
-      let nextId = (maxRow?.id || 0) + 1;
+  // Stringify JSONB fields for BQ
+  for (const row of rows) {
+    row.pnc = JSON.stringify(row.pnc);
+    row.config = JSON.stringify(row.config);
+    row.hierarchy = JSON.stringify(row.hierarchy);
+    row.header_widgets = JSON.stringify(row.header_widgets);
+    row.item_titles_hi = JSON.stringify(row.item_titles_hi);
+    row.history = JSON.stringify(row.history);
+  }
 
-      const versionRows = (inserted || []).filter(r => r.widget_id).map(r => ({
-        id: nextId++,
-        widget_id: r.widget_id,
-        widget_slug: r.slug,
-        env: r.env,
-        version: 1,
-        snapshot: { type: r.widget_type, slug: r.slug, title: r.title, pnc: r.pnc, hierarchy: r.hierarchy },
-        changed_by: user.email || '',
-        change_log: `From submission #${requestId}`,
-      }));
-
-      const { error: vErr } = await sb.from('widget_versions').insert(versionRows);
-      if (vErr) console.warn('[Submission] widget_versions sync failed (non-fatal):', vErr.message);
-    } catch (e) {
-      console.warn('[Submission] widget_versions sync failed (non-fatal):', e.message);
-    }
+  for (const row of rows) {
+    await BQ.insertRow('submissions', row);
   }
 
   return requestId;
@@ -279,21 +258,16 @@ export async function createSubmission(requestIdOverride, widgets, user, env, he
  * Append an action to the history JSONB array for all rows in a request.
  */
 export async function appendHistory(requestId, action, user, extra = {}) {
-  const sb = getClient();
   const entry = { action, by: user?.email || '', at: new Date().toISOString(), ...extra };
 
   // Read current history, append, write back
-  const { data: rows, error: readErr } = await sb
-    .from('submissions')
-    .select('id, history')
-    .eq('request_id', requestId);
+  const rows = await BQ.selectRows('submissions', {
+    where: `request_id = ${parseInt(requestId)}`,
+  });
 
-  if (readErr) throw new Error(`Supabase: ${readErr.message}`);
-
-  for (const row of (rows || [])) {
-    const history = [...(row.history || []), entry];
-    const { error } = await sb.from('submissions').update({ history }).eq('id', row.id);
-    if (error) throw new Error(`Supabase: ${error.message}`);
+  for (const row of rows) {
+    const history = [...(Array.isArray(row.history) ? row.history : JSON.parse(row.history || '[]')), entry];
+    await BQ.updateRows('submissions', { history: JSON.stringify(history) }, `id = ${row.id}`);
   }
 }
 
@@ -302,34 +276,19 @@ export async function appendHistory(requestId, action, user, extra = {}) {
  * so concurrent requests can't both succeed (DB-level CAS).
  */
 export async function updateRequestStatus(requestId, newStatus, user, env, opts = {}) {
-  const sb = getClient();
   const updates = { request_status: newStatus };
 
   if (opts.rejectionReason !== undefined) {
     updates.rejection_reason = opts.rejectionReason || '';
   }
 
-  let query = sb
-    .from('submissions')
-    .update(updates)
-    .eq('request_id', requestId);
-
-  // Atomic guard: only update if current status matches expected
+  const conditions = [`request_id = ${parseInt(requestId)}`];
   if (opts.expectedStatus) {
-    query = query.eq('request_status', opts.expectedStatus);
+    conditions.push(`request_status = '${BQ.esc(opts.expectedStatus)}'`);
   }
 
   console.log(`[Submission] Status -> ${newStatus} for request ${requestId}`);
-  const { data, error, count } = await query.select('id');
-
-  if (error) throw new Error(`Supabase: ${error.message}`);
-
-  // If expectedStatus was set and no rows matched, someone else already changed it
-  if (opts.expectedStatus && (!data || data.length === 0)) {
-    const err = new Error(`Request ${requestId} is no longer in ${opts.expectedStatus} status (concurrent update)`);
-    err.status = 409;
-    throw err;
-  }
+  await BQ.updateRows('submissions', updates, conditions.join(' AND '));
 
   // Append to history
   const ACTION_MAP = { APPROVED: 'approve', REJECTED: 'reject', DEPLOYED: 'deploy', PENDING: 'reopen', DRAFT: 'reopen' };
@@ -418,33 +377,29 @@ function groupRowsIntoRequests(rows) {
 }
 
 export async function fetchRequests(env, { status, date } = {}) {
-  const sb = getClient();
-  let query = sb
-    .from('submissions')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(200);
+  const conditions = [];
+  if (env) conditions.push(`env = '${BQ.esc(env)}'`);
+  if (status) conditions.push(`request_status = '${BQ.esc(status)}'`);
+  if (date) {
+    conditions.push(`created_at >= '${BQ.esc(date)}T00:00:00'`);
+    conditions.push(`created_at < '${BQ.esc(date)}T23:59:59'`);
+  }
 
-  if (env) query = query.eq('env', env);
-  if (status) query = query.eq('request_status', status);
-  if (date) query = query.gte('created_at', `${date}T00:00:00`).lt('created_at', `${date}T23:59:59`);
-
-  const { data, error } = await query;
-  if (error) throw new Error(`Supabase: ${error.message}`);
-  return groupRowsIntoRequests(data || []);
+  const rows = await BQ.selectRows('submissions', {
+    where: conditions.length > 0 ? conditions.join(' AND ') : undefined,
+    orderBy: 'created_at DESC',
+    limit: 200,
+  });
+  return groupRowsIntoRequests(rows);
 }
 
 export async function fetchRequestById(requestId, env) {
-  const sb = getClient();
-  const { data, error } = await sb
-    .from('submissions')
-    .select('*')
-    .eq('request_id', requestId)
-    .order('sort_order', { ascending: true });
-
-  if (error) throw new Error(`Supabase: ${error.message}`);
-  if (!data || data.length === 0) return null;
-  const requests = groupRowsIntoRequests(data);
+  const rows = await BQ.selectRows('submissions', {
+    where: `request_id = ${parseInt(requestId)}`,
+    orderBy: 'sort_order ASC',
+  });
+  if (rows.length === 0) return null;
+  const requests = groupRowsIntoRequests(rows);
   return requests[0] || null;
 }
 
@@ -453,48 +408,35 @@ export async function fetchRequestById(requestId, env) {
 export async function syncDeploy(widgetId, hierarchyWithIds, user, env, requestId) {
   if (!requestId) throw new Error('requestId is required for deploy sync');
 
-  const sb = getClient();
-
-  // After deploy, lookup mirror ID by slug and update widget_id
-  const { data: subRow } = await sb.from('submissions')
-    .select('slug')
-    .eq('request_id', requestId)
-    .limit(1)
-    .single();
+  // Get slug from submissions
+  const subRows = await BQ.selectRows('submissions', {
+    where: `request_id = ${parseInt(requestId)}`,
+    limit: 1,
+  });
+  const slug = subRows[0]?.slug || '';
 
   let mirrorWidgetId = null;
-  if (subRow?.slug) {
+  if (slug) {
     const { lookupSmappWidgetId } = await import('./WidgetDataService.js');
-    mirrorWidgetId = await lookupSmappWidgetId(subRow.slug);
+    mirrorWidgetId = await lookupSmappWidgetId(slug);
     if (mirrorWidgetId) {
-      console.log(`[Submission] Mirror ID found: ${mirrorWidgetId} for slug ${subRow.slug}`);
+      console.log(`[Submission] Mirror ID found: ${mirrorWidgetId} for slug ${slug}`);
     }
   }
 
   const updates = {
     request_status: 'DEPLOYED',
-    hierarchy: hierarchyWithIds,
+    hierarchy: JSON.stringify(hierarchyWithIds),
   };
   if (mirrorWidgetId) updates.widget_id = String(mirrorWidgetId);
 
-  // Update by request_id (widget_id might be UUID or mirror ID)
-  const { data, error } = await sb
-    .from('submissions')
-    .update(updates)
-    .eq('request_id', requestId)
-    .select('id');
+  await BQ.updateRows('submissions', updates, `request_id = ${parseInt(requestId)}`);
+  console.log(`[Submission] Deploy sync completed`);
 
-  if (error) throw new Error(`Supabase deploy sync failed: ${error.message}`);
-
-  const affected = data?.length || 0;
-  console.log(`[Submission] Deploy sync: ${affected} rows updated`);
-
-  // Also update canvas_widgets and widget_versions with mirror ID
-  if (mirrorWidgetId && subRow?.slug) {
-    await sb.from('canvas_widgets').update({ widget_id: String(mirrorWidgetId) }).eq('slug', subRow.slug);
-    for (const row of (data || [])) {
-      await sb.from('widget_versions').update({ widget_id: String(mirrorWidgetId) }).eq('id', row.id);
-    }
+  // Update canvas_widgets and widget_versions with mirror ID
+  if (mirrorWidgetId && slug) {
+    await BQ.updateRows('canvas_widgets', { widget_id: String(mirrorWidgetId) }, `slug = '${BQ.esc(slug)}'`);
+    await BQ.updateRows('widget_versions', { widget_id: String(mirrorWidgetId) }, `widget_slug = '${BQ.esc(slug)}'`);
     console.log(`[Submission] Updated widget_id to ${mirrorWidgetId} across all tables`);
   }
 
