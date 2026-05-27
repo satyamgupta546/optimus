@@ -17,7 +17,13 @@ const PROJECT_ID = 'apna-mart-data';
 
 let storage;
 try {
-    storage = new Storage({ projectId: PROJECT_ID });
+    const credJson = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
+    if (credJson) {
+        const credentials = JSON.parse(credJson);
+        storage = new Storage({ projectId: PROJECT_ID, credentials });
+    } else {
+        storage = new Storage({ projectId: PROJECT_ID });
+    }
 } catch (err) {
     console.warn('[GCS] Failed to initialize Storage client:', err.message);
     storage = null;

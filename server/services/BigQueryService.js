@@ -19,18 +19,17 @@ let bigquery = null;
 
 // Try to init BigQuery — handle Vercel env var for credentials
 try {
-  // Check for JSON credentials in env var (Vercel deployment)
   const credJson = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
   if (credJson) {
-    // Write to temp file — BigQuery SDK needs file path
-    const tmpPath = path.join(os.tmpdir(), 'gcp-credentials.json');
-    fs.writeFileSync(tmpPath, credJson);
-    process.env.GOOGLE_APPLICATION_CREDENTIALS = tmpPath;
-    console.log('[BigQueryService] Using credentials from GOOGLE_APPLICATION_CREDENTIALS_JSON env var');
+    // Parse credentials directly — no temp file needed
+    const credentials = JSON.parse(credJson);
+    bigquery = new BigQuery({ projectId: PROJECT_ID, credentials });
+    console.log(`[BigQueryService] Connected via env credentials → ${PROJECT_ID}.${DATASET} ✓`);
+  } else {
+    // Local dev — uses Application Default Credentials
+    bigquery = new BigQuery({ projectId: PROJECT_ID });
+    console.log(`[BigQueryService] Connected via ADC → ${PROJECT_ID}.${DATASET} ✓`);
   }
-
-  bigquery = new BigQuery({ projectId: PROJECT_ID });
-  console.log(`[BigQueryService] Connected → ${PROJECT_ID}.${DATASET} ✓`);
 } catch (err) {
   console.warn('[BigQueryService] Failed to init BigQuery:', err.message);
 }
