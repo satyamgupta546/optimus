@@ -4,6 +4,7 @@ Used for: sub-cat text_hi, category text_hi, widget heading_hi, SPR heading_hi.
 NOT used for: multimedia widgets.
 """
 
+import asyncio
 import urllib.request
 import urllib.parse
 import json
@@ -11,7 +12,7 @@ import json
 _cache = {}
 
 
-def to_hindi(text: str) -> str:
+async def to_hindi(text: str) -> str:
     """Translate English text to Hindi. Returns empty string if input is empty."""
     if not text or not text.strip():
         return ""
@@ -30,7 +31,7 @@ def to_hindi(text: str) -> str:
             "q": text,
         })
         req = urllib.request.Request(f"{url}?{params}", headers={"User-Agent": "SAM-Bot/1.0"})
-        resp = urllib.request.urlopen(req, timeout=10)
+        resp = await asyncio.to_thread(lambda: urllib.request.urlopen(req, timeout=10))
         data = json.loads(resp.read())
         hindi = data[0][0][0]
         _cache[text] = hindi

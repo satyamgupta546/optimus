@@ -20,17 +20,23 @@ HELP_DATA = {
     },
     "widget": {
         "tool": "sam_widget",
-        "description": "All widget operations — create, edit, list, get, duplicate, history.",
+        "description": "All widget operations — create, edit, list, get, history.",
         "actions": {
             "create": {
                 "description": "Create a new widget. Provide type + required fields. SAM asks for missing fields.",
-                "types": ["spr", "dpr", "banner_scroll", "banner_stick", "primary_masthead", "secondary_masthead"],
+                "types": {
+                    "spr": "Single Product Row (SPR)",
+                    "dpr": "Double Product Row (DPR)",
+                    "banner_scroll": "Banner Carousel",
+                    "banner_stick": "Category Grid",
+                    "primary_masthead": "Primary Masthead",
+                    "secondary_masthead": "Secondary Masthead",
+                },
                 "example": 'sam_widget({ action: "create", type: "spr", title: "Summer Sale", states: ["JH", "CG"], products: "369,370", env: "UAT" })'
             },
             "edit": "Edit existing widget by slug",
             "list": "List widgets with filters",
             "get": "Get widget details by slug",
-            "duplicate": "Duplicate existing widget",
             "history": "View slug lifecycle"
         }
     },

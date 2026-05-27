@@ -52,7 +52,7 @@ async def deploy_spr(samaan_client, widget_data: dict, progress_callback=None) -
     # Auto-translate title to Hindi (skip for multimedia)
     if not has_multimedia:
         from homepage.translator import to_hindi
-        title_hi = title_hi or to_hindi(title)
+        title_hi = title_hi or await to_hindi(title)
 
     # 8-variant widget type resolution
     widget_type = _resolve_widget_type(rows, is_optimized, has_multimedia)

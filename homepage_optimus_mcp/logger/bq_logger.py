@@ -5,6 +5,7 @@ Project: SAM_mcp
 
 import json
 import time
+import fcntl
 from pathlib import Path
 
 # Local JSON fallback (always available, even if BQ is down)
@@ -22,8 +23,10 @@ def _load_local(path: Path) -> list:
 
 
 def _save_local(path: Path, data: list):
-    # Keep last 1000 entries
-    path.write_text(json.dumps(data[-1000:], indent=2, ensure_ascii=False))
+    with open(path, 'w') as f:
+        fcntl.flock(f, fcntl.LOCK_EX)
+        json.dump(data[-1000:], f, indent=2, ensure_ascii=False)
+        fcntl.flock(f, fcntl.LOCK_UN)
 
 
 def log_action(user_email: str, action: str, slug: str = "", params: dict = None,
@@ -46,8 +49,22 @@ def log_action(user_email: str, action: str, slug: str = "", params: dict = None
     logs.append(entry)
     _save_local(LOCAL_LOG_FILE, logs)
 
-    # TODO: BigQuery insert
-    # bq_client.insert_rows("SAM_mcp.audit_log", [entry])
+    # BigQuery audit insert (non-blocking)
+    try:
+        from google.cloud import bigquery as bq_lib
+        client = bq_lib.Client(project="apna-mart-data")
+        table = "apna-mart-data.optimus.mcp_audit_log"
+        bq_entry = {
+            "user_email": entry["user_email"],
+            "action": entry["action"],
+            "slug": entry["slug"],
+            "status": entry["status"],
+            "error": entry["error"],
+            "timestamp": entry["timestamp_iso"],
+        }
+        client.insert_rows_json(table, [bq_entry])
+    except Exception:
+        pass  # BQ audit is non-blocking
 
     return entry
 

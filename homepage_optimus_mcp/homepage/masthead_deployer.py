@@ -200,7 +200,7 @@ async def deploy_secondary_masthead(samaan_client, widget_data: dict, progress_c
             page_type = item.get("page_type", "category_page")
 
             from homepage.translator import to_hindi
-            heading_hi = to_hindi(heading)
+            heading_hi = await to_hindi(heading)
 
             # Step A: Page Layout
             r = await samaan_client.create_page_layout({

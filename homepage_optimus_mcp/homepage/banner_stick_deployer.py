@@ -50,7 +50,7 @@ async def deploy_banner_stick(samaan_client, widget_data: dict, progress_callbac
 
     # Auto-translate title to Hindi
     from homepage.translator import to_hindi
-    title_hi = to_hindi(title)
+    title_hi = await to_hindi(title)
 
     results = {"steps": [], "slug": slug}
     total_steps = 9
@@ -94,6 +94,7 @@ async def deploy_banner_stick(samaan_client, widget_data: dict, progress_callbac
             sc_slug = f"{slug}_sub_cat_wi{state_suffix}"
 
             codes = [p.strip() for p in state_products_str.split(",") if p.strip()]
+            codes_int = [int(c) for c in codes if str(c).strip().isdigit()]
 
             form = aiohttp.FormData()
             form.add_field("slug_name", sc_slug)
@@ -111,7 +112,7 @@ async def deploy_banner_stick(samaan_client, widget_data: dict, progress_callbac
             form.add_field("media_hi", "")
             form.add_field("media_bg", "")
             form.add_field("filters", "[]")
-            form.add_field("filter_lst", json.dumps([{"condition": "in_stk_item_codes", "value": ",".join(codes)}]))
+            form.add_field("filter_lst", json.dumps([{"condition": "in_stk_item_codes", "value": codes_int}]))
             form.add_field("property_lst", "[]")
             form.add_field("pl_edit", "PL")
             form.add_field("is_clickable", "yes")

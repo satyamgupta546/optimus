@@ -38,6 +38,16 @@ def load_config(name: str) -> dict:
     return {}
 
 
+# Cache configs at startup
+_CONFIGS = {
+    "samaan": load_config("samaan.json"),
+    "optimus": load_config("optimus.json"),
+    "projects": load_config("projects.json"),
+    "users": load_config("users.json"),
+    "gas_scripts": load_config("gas_scripts.json"),
+}
+
+
 # ── MCP Server ──
 server = Server("sam")
 
@@ -50,19 +60,19 @@ async def list_tools():
     return [
         Tool(
             name="sam_widget",
-            description="Widget operations: create, edit, list, get, duplicate, history. Use action parameter to select operation.",
+            description="Widget operations: create, edit, list, get, history. Supports: SPR (Single Product Row), DPR (Double Product Row), Banner Carousel (banner_scroll), Category Grid (banner_stick), Primary Masthead, Secondary Masthead.",
             inputSchema={
                 "type": "object",
                 "properties": {
                     "action": {
                         "type": "string",
-                        "enum": ["create", "edit", "list", "get", "duplicate", "history"],
+                        "enum": ["create", "edit", "list", "get", "history"],
                         "description": "Action to perform"
                     },
                     "type": {
                         "type": "string",
                         "enum": ["spr", "dpr", "banner_scroll", "banner_stick", "primary_masthead", "secondary_masthead"],
-                        "description": "Widget type. spr=Single Product Row, dpr=Double Product Row."
+                        "description": "Widget type. spr=Single Product Row (SPR), dpr=Double Product Row (DPR), banner_scroll=Banner Carousel, banner_stick=Category Grid, primary_masthead=Primary Masthead, secondary_masthead=Secondary Masthead."
                     },
                     "rows": {
                         "type": "integer",
@@ -96,14 +106,18 @@ async def list_tools():
                     "slug_or_id": {"type": "string", "description": "Slug or ID (for get action)"},
                     "status": {"type": "string", "description": "Filter by status (for list action)"},
                     "env": {"type": "string", "enum": ["PROD", "UAT"], "description": "Environment: PROD or UAT (default: UAT)"},
-                    "confirm": {"type": "boolean", "description": "Set to true to execute after reviewing summary. First call without confirm shows summary, second call with confirm=true executes."}
+                    "confirm": {"type": "boolean", "description": "Set to true to execute after reviewing summary. First call without confirm shows summary, second call with confirm=true executes."},
+                    "prod_ack": {
+                        "type": "boolean",
+                        "description": "Required for PROD deploys. Set to true to confirm production deployment after reviewing the PROD warning."
+                    }
                 },
                 "required": ["action"]
             }
         ),
         Tool(
             name="sam_bulk",
-            description="Bulk item code operations: upload (from Google Sheet to Samaan) or dry_run (preview without uploading).",
+            description="Bulk item code operations (coming soon). Currently not implemented.",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -181,13 +195,7 @@ async def call_tool(name: str, arguments: dict):
     """Route tool calls to handlers."""
     from mcp.types import TextContent
 
-    configs = {
-        "samaan": load_config("samaan.json"),
-        "optimus": load_config("optimus.json"),
-        "projects": load_config("projects.json"),
-        "users": load_config("users.json"),
-        "gas_scripts": load_config("gas_scripts.json"),
-    }
+    configs = _CONFIGS
 
     try:
         if name == "sam_widget":

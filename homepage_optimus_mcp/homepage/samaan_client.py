@@ -149,10 +149,9 @@ class SamaanClient:
         try:
             async with self._session.post(url, data=form_data, headers=headers, timeout=aiohttp.ClientTimeout(total=30)) as resp:
                 if resp.status == 403 and not is_retry:
-                    success = await self.login()
-                    if success:
-                        return await self._post_form(endpoint_key, form_data, is_retry=True)
-                    return {"error": "Session expired. Re-login failed."}
+                    await self.login()
+                    # Cannot retry — aiohttp.FormData is consumed after first POST. Caller should retry.
+                    return {"error": f"Session expired on {endpoint_key}. Re-login done, please retry the operation."}
                 try:
                     return await resp.json()
                 except:
@@ -284,7 +283,7 @@ class SamaanClient:
                 })
                 jar_temp = http.cookiejar.CookieJar()
                 opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar_temp))
-                resp = opener.open(req, timeout=15)
+                resp = await asyncio.to_thread(lambda: opener.open(req, timeout=15))
                 data = json.loads(resp.read())
 
                 items = []
@@ -389,7 +388,7 @@ class SamaanClient:
             import http.cookiejar
             jar = http.cookiejar.CookieJar()
             opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
-            resp = opener.open(req, timeout=30)
+            await asyncio.to_thread(lambda: opener.open(req, timeout=30))
             return {"status": "updated", "slug": slug_name, "id": widget_id}
         except urllib.error.HTTPError as e:
             body_text = e.read().decode()[:300] if e.fp else ""
@@ -484,7 +483,7 @@ class SamaanClient:
             import http.cookiejar
             jar = http.cookiejar.CookieJar()
             opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
-            resp = opener.open(req, timeout=30)
+            await asyncio.to_thread(lambda: opener.open(req, timeout=30))
             return {"status": "updated", "item_id": item_id, "slug": slug_name}
         except urllib.error.HTTPError as e:
             body_text = e.read().decode()[:300] if e.fp else ""

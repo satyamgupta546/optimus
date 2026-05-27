@@ -77,10 +77,29 @@ async def _create(args: dict, configs: dict) -> dict:
         missing.append("page_type — Product Listing Page or Category Page?")
 
     if missing:
-        return {"status": "missing_fields", "message": "Please provide the following details:", "missing": missing}
+        return {
+            "status": "missing_fields",
+            "message": "Please provide the following details:",
+            "missing": missing,
+            "hint": f"Call sam_help(topic='{widget_type or 'widget'}') for field requirements",
+        }
 
     confirm = args.get("confirm", False)
     final_slug = slug or _generate_slug(title, widget_type)
+
+    # Slug duplicate check (check both base slug and with deployer suffix)
+    from homepage.bq_client import BQClient
+    bq = BQClient()
+    _DEPLOY_SUFFIX = {"spr": "_spr_opt", "dpr": "_spr", "banner_scroll": "_Cl_w_HP", "banner_stick": "_cm_hp", "primary_masthead": "_pm_hp", "secondary_masthead": "_sm_hp"}
+    full_slug = f"{final_slug}{_DEPLOY_SUFFIX.get(widget_type, '')}" if not any(final_slug.endswith(s) for s in _DEPLOY_SUFFIX.values()) else final_slug
+    if bq.slug_exists(final_slug, env) or bq.slug_exists(full_slug, env):
+        dup = full_slug if bq.slug_exists(full_slug, env) else final_slug
+        return {
+            "status": "duplicate_slug",
+            "message": f"Slug '{dup}' already exists in {env}. Use a different slug.",
+            "environment": env,
+            "existing_slug": dup,
+        }
 
     # If confirm=false → show summary
     if not confirm:
@@ -93,7 +112,15 @@ async def _create(args: dict, configs: dict) -> dict:
                 "states": states, "products": products, "page_type": page_type,
                 "image": image, "start_time": start_time, "end_time": end_time,
             },
-            "next_step": "Show this summary to user. If user confirms, call sam_widget again with all same params + confirm=true"
+            "next_step": "Confirm? Call again with confirm=true",
+        }
+
+    # Fix 1: PROD safety gate
+    if env == "PROD" and not args.get("prod_ack"):
+        return {
+            "status": "prod_confirmation_required",
+            "message": f"⚠️ PROD DEPLOY — This will go LIVE for real users!\n\nWidget: {title} ({widget_type})\nSlug: {final_slug}\nStates: {', '.join(states)}\n\nCall again with prod_ack=true to proceed.",
+            "environment": "PROD",
         }
 
     # confirm=true → DEPLOY via Samaan API
@@ -101,93 +128,95 @@ async def _create(args: dict, configs: dict) -> dict:
     from logger.bq_logger import log_action, log_slug_event
 
     samaan_cfg = configs.get("samaan", {})
+
+    # Fix 2: Session leak — try/finally
     samaan = SamaanClient(samaan_cfg, env)
+    try:
+        # Login to Samaan
+        login_ok = await samaan.login()
+        if not login_ok:
+            return {"status": "failed", "error": f"Samaan login failed on {env}. Check credentials."}
 
-    # Login to Samaan
-    login_ok = await samaan.login()
-    if not login_ok:
-        return {"status": "failed", "error": f"Samaan login failed on {env}. Check credentials."}
+        product_list = [p.strip() for p in products.split(",") if p.strip()]
 
-    product_list = [p.strip() for p in products.split(",") if p.strip()]
+        # Deploy based on widget type
+        if widget_type in ("spr", "dpr"):
+            from homepage.spr_deployer import deploy_spr
 
-    # Deploy based on widget type
-    if widget_type in ("spr", "dpr"):
-        from homepage.spr_deployer import deploy_spr
+            deploy_data = {
+                "slug": final_slug,
+                "title": title,
+                "titleHi": "",
+                "products": products,
+                "stateProducts": _build_state_products(states, products),
+                "pageType": page_type,
+                "start_time": start_time,
+                "end_time": end_time,
+                "rows": rows,
+                "is_optimized": is_optimized,
+                "has_multimedia": bool(image),
+                "image": image,
+            }
 
-        deploy_data = {
-            "slug": final_slug,
-            "title": title,
-            "titleHi": "",
-            "products": products,
-            "stateProducts": _build_state_products(states, products),
-            "pageType": page_type,
-            "start_time": start_time,
-            "end_time": end_time,
-            "rows": rows,
-            "is_optimized": is_optimized,
-            "has_multimedia": bool(image),
-            "image": image,
-        }
+            result = await deploy_spr(samaan, deploy_data)
+        elif widget_type == "banner_scroll":
+            from homepage.banner_carousel_deployer import deploy_banner_carousel
 
-        result = await deploy_spr(samaan, deploy_data)
-    elif widget_type == "banner_scroll":
-        from homepage.banner_carousel_deployer import deploy_banner_carousel
+            deploy_data = {
+                "slug": final_slug,
+                "title": title,
+                "products": products,
+                "stateProducts": _build_state_products(states, products),
+                "image": image,
+                "media_number": args.get("media_number", "3.5"),
+                "start_time": start_time,
+                "end_time": end_time,
+            }
 
-        deploy_data = {
-            "slug": final_slug,
-            "title": title,
-            "products": products,
-            "stateProducts": _build_state_products(states, products),
-            "image": image,
-            "media_number": args.get("media_number", "3.5"),
-            "start_time": start_time,
-            "end_time": end_time,
-        }
+            result = await deploy_banner_carousel(samaan, deploy_data)
+        elif widget_type == "banner_stick":
+            from homepage.banner_stick_deployer import deploy_banner_stick
 
-        result = await deploy_banner_carousel(samaan, deploy_data)
-    elif widget_type == "banner_stick":
-        from homepage.banner_stick_deployer import deploy_banner_stick
+            deploy_data = {
+                "slug": final_slug,
+                "title": title,
+                "products": products,
+                "stateProducts": _build_state_products(states, products),
+                "image": image,
+                "start_time": start_time,
+                "end_time": end_time,
+            }
 
-        deploy_data = {
-            "slug": final_slug,
-            "title": title,
-            "products": products,
-            "stateProducts": _build_state_products(states, products),
-            "image": image,
-            "start_time": start_time,
-            "end_time": end_time,
-        }
+            result = await deploy_banner_stick(samaan, deploy_data)
+        elif widget_type == "primary_masthead":
+            from homepage.masthead_deployer import deploy_primary_masthead
 
-        result = await deploy_banner_stick(samaan, deploy_data)
-    elif widget_type == "primary_masthead":
-        from homepage.masthead_deployer import deploy_primary_masthead
+            deploy_data = {
+                "slug": final_slug,
+                "master_key": args.get("master_key", ""),
+                "image": image,
+                "start_time": start_time,
+                "end_time": end_time,
+                "aspect_ratio": args.get("aspect_ratio", "1"),
+            }
+            result = await deploy_primary_masthead(samaan, deploy_data)
+        elif widget_type == "secondary_masthead":
+            from homepage.masthead_deployer import deploy_secondary_masthead
 
-        deploy_data = {
-            "slug": final_slug,
-            "master_key": args.get("master_key", ""),
-            "image": image,
-            "start_time": start_time,
-            "end_time": end_time,
-            "aspect_ratio": args.get("aspect_ratio", "1"),
-        }
-        result = await deploy_primary_masthead(samaan, deploy_data)
-    elif widget_type == "secondary_masthead":
-        from homepage.masthead_deployer import deploy_secondary_masthead
-
-        deploy_data = {
-            "slug": final_slug,
-            "image": image,
-            "master_key": args.get("master_key", ""),
-            "carousel_items": args.get("carousel_items", []),
-            "start_time": start_time,
-            "end_time": end_time,
-            "aspect_ratio": args.get("aspect_ratio", "4"),
-        }
-        result = await deploy_secondary_masthead(samaan, deploy_data)
-    else:
-        result = {"status": "failed", "message": f"Unknown widget type: {widget_type}"}
-
-    await samaan.close()
+            deploy_data = {
+                "slug": final_slug,
+                "image": image,
+                "master_key": args.get("master_key", ""),
+                "carousel_items": args.get("carousel_items", []),
+                "start_time": start_time,
+                "end_time": end_time,
+                "aspect_ratio": args.get("aspect_ratio", "4"),
+            }
+            result = await deploy_secondary_masthead(samaan, deploy_data)
+        else:
+            result = {"status": "failed", "message": f"Unknown widget type: {widget_type}"}
+    finally:
+        await samaan.close()
 
     if result.get("status") == "deployed":
         log_action("sam_mcp", "widget.create", final_slug, {"type": widget_type, "env": env}, result, "success")
@@ -195,8 +224,6 @@ async def _create(args: dict, configs: dict) -> dict:
 
         # Save to BigQuery canvas_widgets for tracking
         try:
-            from homepage.bq_client import BQClient
-            bq = BQClient()
             deployed_slug = result.get("spr_slug") or result.get("carousel_slug") or result.get("category_slug") or result.get("masthead_slug") or final_slug
             bq.create_widget({
                 "type": _WIDGET_TYPE_MAP.get(widget_type, widget_type),
@@ -211,21 +238,22 @@ async def _create(args: dict, configs: dict) -> dict:
         except Exception as bq_err:
             pass  # Non-blocking — widget is deployed even if BQ save fails
 
-        return {
+        # Fix 4: Build response, exclude null slugs
+        response = {
             "status": "deployed",
             "message": f"Widget deployed on {env}!",
             "environment": env,
             "widget_slug": result.get("spr_slug") or result.get("carousel_slug") or result.get("category_slug") or result.get("masthead_slug") or final_slug,
-            "spr_slug": result.get("spr_slug"),
-            "carousel_slug": result.get("carousel_slug"),
-            "category_slug": result.get("category_slug"),
-            "plp_slug": result.get("plp_slug"),
-            "page_slug": result.get("page_slug"),
             "title": title,
             "states": states,
             "products_count": len(product_list),
             "steps": result.get("steps", []),
         }
+        for key in ["spr_slug", "carousel_slug", "category_slug", "plp_slug", "page_slug", "masthead_slug"]:
+            val = result.get(key)
+            if val:
+                response[key] = val
+        return response
     else:
         log_action("sam_mcp", "widget.create", final_slug, {"type": widget_type, "env": env}, result, "failed", str(result.get("error", "")))
         return {
@@ -263,165 +291,169 @@ async def _edit(args: dict, configs: dict) -> dict:
 
     confirm = args.get("confirm", False)
 
+    # Fix 1: PROD safety gate (edit)
+    if env == "PROD" and not args.get("prod_ack"):
+        return {
+            "status": "prod_confirmation_required",
+            "message": f"⚠️ PROD EDIT — This will go LIVE for real users!\n\nSlug: {slug}\nFields: {list(fields.keys())}\n\nCall again with prod_ack=true to proceed.",
+            "environment": "PROD",
+        }
+
     from homepage.samaan_client import SamaanClient
     from logger.bq_logger import log_action
 
     samaan_cfg = configs.get("samaan", {})
-    samaan = SamaanClient(samaan_cfg, env)
-    login_ok = await samaan.login()
-    if not login_ok:
-        return {"status": "failed", "error": f"Samaan login failed on {env}."}
 
     # Detect if widget or widget item
     item_suffixes = ["_sc_wi", "_pr_wi", "_cl_wi", "_cat_wi", "_sub_cat_wi", "_carousel", "_subcat_"]
     is_widget_item = any(s in slug for s in item_suffixes)
 
-    if is_widget_item:
-        # Widget item edit — find item via parent widget mapping
-        # Extract parent widget slug from item slug
-        parent_slug = _get_parent_widget_slug(slug)
+    # Fix 2: Session leak — try/finally (edit)
+    samaan = SamaanClient(samaan_cfg, env)
+    try:
+        login_ok = await samaan.login()
+        if not login_ok:
+            return {"status": "failed", "error": f"Samaan login failed on {env}."}
 
-        items_data = await samaan.get_widget_items(parent_slug)
-        if "error" in items_data:
-            await samaan.close()
-            return {"status": "failed", "error": f"Could not find widget items for parent '{parent_slug}' on {env}.", "detail": items_data}
+        if is_widget_item:
+            # Widget item edit — find item via parent widget mapping
+            # Extract parent widget slug from item slug
+            parent_slug = _get_parent_widget_slug(slug)
 
-        # Find the specific item
-        item = None
-        for it in items_data.get("items", []):
-            if it.get("slug_name") == slug:
-                item = it
-                break
+            items_data = await samaan.get_widget_items(parent_slug)
+            if "error" in items_data:
+                return {"status": "failed", "error": f"Could not find widget items for parent '{parent_slug}' on {env}.", "detail": items_data}
 
-        if not item:
-            await samaan.close()
-            return {"status": "failed", "error": f"Widget item '{slug}' not found in mappings of '{parent_slug}' on {env}.",
-                    "available_items": [it.get("slug_name") for it in items_data.get("items", [])]}
+            # Find the specific item
+            item = None
+            for it in items_data.get("items", []):
+                if it.get("slug_name") == slug:
+                    item = it
+                    break
 
-        item_id = item.get("widget_item_id")
+            if not item:
+                return {"status": "failed", "error": f"Widget item '{slug}' not found in mappings of '{parent_slug}' on {env}.",
+                        "available_items": [it.get("slug_name") for it in items_data.get("items", [])]}
 
-        if not confirm:
-            await samaan.close()
+            item_id = item.get("widget_item_id")
+
+            if not confirm:
+                return {
+                    "status": "ready",
+                    "message": f"Ready to edit widget item '{slug}' (ID: {item_id}) on {env}. Call with confirm=true.",
+                    "environment": env,
+                    "slug": slug,
+                    "item_id": str(item_id),
+                    "type": "widget_item",
+                    "parent_widget": parent_slug,
+                    "current": {
+                        "level": f"{item.get('level_tag')}/{item.get('level_property')}",
+                        "start_time": str(item.get("start_time", "")),
+                        "end_time": str(item.get("end_time", "")),
+                        "priority": item.get("priority"),
+                    },
+                    "updates": fields,
+                    "next_step": "Confirm? Call again with confirm=true",
+                }
+
+            # Fill mandatory fields from current data if not in user fields
+            if "start_time" not in fields and item.get("start_time"):
+                fields["start_time"] = str(item["start_time"]).replace("T", " ").replace("+00:00", "").replace("Z", "")
+            if "end_time" not in fields and item.get("end_time"):
+                fields["end_time"] = str(item["end_time"]).replace("T", " ").replace("+00:00", "").replace("Z", "")
+
+            # Detect item_type from slug
+            if "item_type" not in fields:
+                if "_pr_wi" in slug:
+                    fields["item_type"] = "item_rows"
+                elif "_cl_wi" in slug or "_carousel" in slug:
+                    fields["item_type"] = "carousel"
+                elif "_cat_wi" in slug:
+                    fields["item_type"] = "category"
+                else:
+                    fields["item_type"] = "sub_category"
+
+            # text_en — use slug base if not provided
+            if "text_en" not in fields:
+                fields["text_en"] = slug.replace("_", " ").split(" sc wi")[0].split(" pr wi")[0].title()
+
+            # Execute update
+            result = await samaan.update_widget_item(str(item_id), slug, fields)
+            log_action("sam_mcp", "widget_item.edit", slug, fields, result, "success" if "error" not in result else "failed")
             return {
-                "status": "ready",
-                "message": f"Ready to edit widget item '{slug}' (ID: {item_id}) on {env}. Call with confirm=true.",
+                "status": result.get("status", "failed"),
+                "message": f"Widget item '{slug}' updated on {env}." if "error" not in result else f"Failed: {result.get('error')}",
                 "environment": env,
                 "slug": slug,
                 "item_id": str(item_id),
-                "type": "widget_item",
-                "parent_widget": parent_slug,
-                "current": {
-                    "level": f"{item.get('level_tag')}/{item.get('level_property')}",
-                    "start_time": str(item.get("start_time", "")),
-                    "end_time": str(item.get("end_time", "")),
-                    "priority": item.get("priority"),
-                },
                 "updates": fields,
-                "next_step": "Call sam_widget(action='edit', slug=..., fields_to_update=..., env=..., confirm=true)"
+                "result": result,
             }
 
-        # Fill mandatory fields from current data if not in user fields
-        if "start_time" not in fields and item.get("start_time"):
-            fields["start_time"] = str(item["start_time"]).replace("T", " ").replace("+00:00", "").replace("Z", "")
-        if "end_time" not in fields and item.get("end_time"):
-            fields["end_time"] = str(item["end_time"]).replace("T", " ").replace("+00:00", "").replace("Z", "")
+        else:
+            # Widget edit — PATCH by slug
+            current = await samaan.get_widget(slug)
+            if "error" in current:
+                return {"status": "failed", "error": f"Widget '{slug}' not found on {env}.", "detail": current}
 
-        # Detect item_type from slug
-        if "item_type" not in fields:
-            if "_pr_wi" in slug:
-                fields["item_type"] = "item_rows"
-            elif "_cl_wi" in slug or "_carousel" in slug:
-                fields["item_type"] = "carousel"
-            elif "_cat_wi" in slug:
-                fields["item_type"] = "category"
-            else:
-                fields["item_type"] = "sub_category"
+            # Show current before confirming
+            current_info = {}
+            if isinstance(current, list) and len(current) > 0:
+                current_info = current[0]
+            elif isinstance(current, dict):
+                current_info = current
 
-        # text_en — use slug base if not provided
-        if "text_en" not in fields:
-            fields["text_en"] = slug.replace("_", " ").split(" sc wi")[0].split(" pr wi")[0].title()
+            if not confirm:
+                return {
+                    "status": "ready",
+                    "message": f"Ready to edit widget '{slug}' on {env}. Call with confirm=true.",
+                    "environment": env,
+                    "slug": slug,
+                    "type": "widget",
+                    "current": {
+                        "heading_en": current_info.get("heading_en", ""),
+                        "start_time": str(current_info.get("start_time", "")),
+                        "end_time": str(current_info.get("end_time", "")),
+                        "widget_type": current_info.get("widget_type", ""),
+                    },
+                    "updates": fields,
+                    "next_step": "Confirm? Call again with confirm=true",
+                }
 
-        # Execute update
-        result = await samaan.update_widget_item(str(item_id), slug, fields)
-        await samaan.close()
-        log_action("sam_mcp", "widget_item.edit", slug, fields, result, "success" if "error" not in result else "failed")
-        return {
-            "status": result.get("status", "failed"),
-            "message": f"Widget item '{slug}' updated on {env}." if "error" not in result else f"Failed: {result.get('error')}",
-            "environment": env,
-            "slug": slug,
-            "item_id": str(item_id),
-            "updates": fields,
-            "result": result,
-        }
+            # Build update fields
+            update_fields = {}
+            if "heading" in fields or "heading_en" in fields:
+                update_fields["heading_en"] = fields.get("heading_en") or fields.get("heading", "")
+            if "heading_hi" in fields:
+                update_fields["heading_hi"] = fields["heading_hi"]
+            if "start_time" in fields:
+                update_fields["start_time"] = fields["start_time"]
+            if "end_time" in fields:
+                update_fields["end_time"] = fields["end_time"]
+            if "deactivated_flag" in fields:
+                update_fields["deactivated_flag"] = fields["deactivated_flag"]
 
-    else:
-        # Widget edit — PATCH by slug
-        current = await samaan.get_widget(slug)
-        if "error" in current:
-            await samaan.close()
-            return {"status": "failed", "error": f"Widget '{slug}' not found on {env}.", "detail": current}
+            if not update_fields:
+                return {"error": "No valid fields to update. Supported: heading, heading_en, heading_hi, start_time, end_time, deactivated_flag"}
 
-        # Show current before confirming
-        current_info = {}
-        if isinstance(current, list) and len(current) > 0:
-            current_info = current[0]
-        elif isinstance(current, dict):
-            current_info = current
-
-        if not confirm:
-            await samaan.close()
+            result = await samaan.update_widget(slug, update_fields)
+            log_action("sam_mcp", "widget.edit", slug, update_fields, result, "success" if "error" not in result else "failed")
             return {
-                "status": "ready",
-                "message": f"Ready to edit widget '{slug}' on {env}. Call with confirm=true.",
+                "status": result.get("status", "failed"),
+                "message": f"Widget '{slug}' updated on {env}." if "error" not in result else f"Failed: {result.get('error')}",
                 "environment": env,
                 "slug": slug,
-                "type": "widget",
-                "current": {
-                    "heading_en": current_info.get("heading_en", ""),
-                    "start_time": str(current_info.get("start_time", "")),
-                    "end_time": str(current_info.get("end_time", "")),
-                    "widget_type": current_info.get("widget_type", ""),
-                },
-                "updates": fields,
-                "next_step": "Call sam_widget(action='edit', slug=..., fields_to_update=..., env=..., confirm=true)"
+                "updates": update_fields,
+                "result": result,
             }
-
-        # Build update fields
-        update_fields = {}
-        if "heading" in fields or "heading_en" in fields:
-            update_fields["heading_en"] = fields.get("heading_en") or fields.get("heading", "")
-        if "heading_hi" in fields:
-            update_fields["heading_hi"] = fields["heading_hi"]
-        if "start_time" in fields:
-            update_fields["start_time"] = fields["start_time"]
-        if "end_time" in fields:
-            update_fields["end_time"] = fields["end_time"]
-        if "deactivated_flag" in fields:
-            update_fields["deactivated_flag"] = fields["deactivated_flag"]
-
-        if not update_fields:
-            await samaan.close()
-            return {"error": "No valid fields to update. Supported: heading, heading_en, heading_hi, start_time, end_time, deactivated_flag"}
-
-        result = await samaan.update_widget(slug, update_fields)
+    finally:
         await samaan.close()
-        log_action("sam_mcp", "widget.edit", slug, update_fields, result, "success" if "error" not in result else "failed")
-        return {
-            "status": result.get("status", "failed"),
-            "message": f"Widget '{slug}' updated on {env}." if "error" not in result else f"Failed: {result.get('error')}",
-            "environment": env,
-            "slug": slug,
-            "updates": update_fields,
-            "result": result,
-        }
 
 
 async def _list(args: dict, configs: dict) -> dict:
     """List widgets from BigQuery."""
-    env = args.get("env")
-    if not env:
-        return {"status": "missing_env", "message": "Which environment? PROD or UAT?", "options": ["PROD", "UAT"]}
+    # Fix 5: Default UAT for read-only operations
+    env = args.get("env", "UAT")
 
     from homepage.bq_client import BQClient
     bq = BQClient()
@@ -438,21 +470,21 @@ async def _list(args: dict, configs: dict) -> dict:
     return {
         "environment": env,
         "count": len(widgets),
+        # Fix 8: Remove created_at, keep slug/type/title/status/env
         "widgets": [{
             "slug": w.get("slug"),
             "type": w.get("type"),
             "title": w.get("title"),
             "status": w.get("status"),
-            "created_at": str(w.get("created_at", "")),
+            "env": env,
         } for w in widgets]
     }
 
 
 async def _get(args: dict, configs: dict) -> dict:
     """Get widget details from BigQuery."""
-    env = args.get("env")
-    if not env:
-        return {"status": "missing_env", "message": "Which environment? PROD or UAT?", "options": ["PROD", "UAT"]}
+    # Fix 5: Default UAT for read-only operations
+    env = args.get("env", "UAT")
 
     slug_or_id = args.get("slug_or_id")
     if not slug_or_id:
@@ -480,20 +512,15 @@ async def _duplicate(args: dict, configs: dict) -> dict:
     if not env:
         return {"status": "missing_env", "message": "Which environment? PROD or UAT?", "options": ["PROD", "UAT"]}
 
-    slug = args.get("slug")
+    # Fix 6: Accept slug_or_id in _duplicate
+    slug = args.get("slug") or args.get("slug_or_id")
     if not slug:
-        return {"error": "widget.duplicate requires 'slug' parameter."}
+        return {"error": "widget.duplicate requires 'slug' (or 'slug_or_id') parameter."}
 
-    from homepage.bq_client import BQClient
-    bq = BQClient()
-
-    widget = bq.get_widget(slug, env)
-    if "error" in widget:
-        return widget
-
+    # Fix 10: Remove 'pending_implementation', clearly say not available
     return {
-        "status": "pending_implementation",
-        "message": f"Widget '{slug}' found on {env}. Duplicate via BQ insert coming soon.",
+        "status": "not_available",
+        "message": f"Widget duplicate is coming soon. For now, create a new widget with a different slug.",
         "environment": env,
         "original_slug": slug,
     }
@@ -501,13 +528,13 @@ async def _duplicate(args: dict, configs: dict) -> dict:
 
 async def _history(args: dict, configs: dict) -> dict:
     """View slug lifecycle from widget_versions table."""
-    env = args.get("env")
-    if not env:
-        return {"status": "missing_env", "message": "Which environment? PROD or UAT?", "options": ["PROD", "UAT"]}
+    # Fix 5: Default UAT for read-only operations
+    env = args.get("env", "UAT")
 
-    slug = args.get("slug")
+    # Fix 6: Accept slug_or_id in _history
+    slug = args.get("slug") or args.get("slug_or_id")
     if not slug:
-        return {"error": "widget.history requires 'slug' parameter."}
+        return {"error": "widget.history requires 'slug' (or 'slug_or_id') parameter."}
 
     from homepage.bq_client import BQClient
     bq = BQClient()

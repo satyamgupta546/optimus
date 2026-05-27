@@ -17,10 +17,15 @@ VERSIONS_TABLE = f"{PROJECT}.{DATASET}.widget_versions"
 USER_ROLES_TABLE = f"{PROJECT}.{DATASET}.user_roles"
 LOCATIONS_TABLE = f"{PROJECT}.{DATASET}.locations"
 
+_bq_client_instance = None
+
 
 class BQClient:
     def __init__(self):
-        self.client = bigquery.Client(project=PROJECT)
+        global _bq_client_instance
+        if _bq_client_instance is None:
+            _bq_client_instance = bigquery.Client(project=PROJECT)
+        self.client = _bq_client_instance
 
     def _query(self, sql: str, params: list = None) -> list:
         """Run a query and return rows as list of dicts."""
@@ -111,12 +116,22 @@ class BQClient:
 
     def _create_version(self, widget_id: str, slug: str, env: str, snapshot: dict, changed_by: str):
         """Insert version record."""
+        # Get next version number
+        version_rows = self._query(
+            f"SELECT MAX(version) as max_v FROM `{VERSIONS_TABLE}` WHERE widget_slug = @slug AND env = @env",
+            [
+                bigquery.ScalarQueryParameter("slug", "STRING", slug),
+                bigquery.ScalarQueryParameter("env", "STRING", env),
+            ]
+        )
+        next_version = (version_rows[0]["max_v"] or 0) + 1 if version_rows else 1
+
         now = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
         row = {
             "widget_id": widget_id,
             "widget_slug": slug,
             "env": env,
-            "version": 1,
+            "version": next_version,
             "snapshot": str(snapshot),
             "changed_by": changed_by,
             "change_log": "Created via SAM MCP",
