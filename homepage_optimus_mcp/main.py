@@ -1,20 +1,20 @@
 """
 SAM MCP Server — Remote MCP server for Homepage Pod operations.
-Connects to Claude Desktop/Code via SSE.
+Connects to Claude Desktop/Code via Streamable HTTP (stateless).
 
 Usage:
-  python main.py                    # Start SSE server on port 8080
+  python main.py                    # Start server on port 8080
   python main.py --port 9090        # Custom port
 """
 
 import json
-import asyncio
+import contextlib
 import argparse
 from pathlib import Path
 from mcp.server import Server
-from mcp.server.sse import SseServerTransport
+from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
 from starlette.applications import Starlette
-from starlette.routing import Route, Mount
+from starlette.routing import Route
 from starlette.responses import JSONResponse
 import uvicorn
 
@@ -217,7 +217,7 @@ async def call_tool(name: str, arguments: dict):
         return [TextContent(type="text", text=json.dumps({"error": str(e)}, ensure_ascii=False))]
 
 
-# ── SSE Transport + HTTP App ──
+# ── Streamable HTTP Transport + HTTP App ──
 
 async def homepage(request):
     from starlette.responses import HTMLResponse
@@ -246,7 +246,7 @@ async def homepage(request):
             <tr><th>Path</th><th>Purpose</th></tr>
             <tr><td><code>/</code></td><td>This page</td></tr>
             <tr><td><code>/health</code></td><td>Health check (JSON)</td></tr>
-            <tr><td><code>/sse</code></td><td>MCP SSE endpoint — add this in Claude Desktop</td></tr>
+            <tr><td><code>/mcp</code></td><td>MCP Streamable HTTP endpoint — add this in Claude Desktop</td></tr>
         </table>
 
         <h2>MCP Tools (5)</h2>
@@ -264,7 +264,7 @@ async def homepage(request):
         <pre><code>{
   "mcpServers": {
     "sam": {
-      "url": "http://localhost:8080/sse"
+      "url": "http://localhost:8080/mcp"
     }
   }
 }</code></pre>
@@ -278,26 +278,25 @@ async def health(request):
 
 
 def create_app():
-    sse = SseServerTransport("/messages/")
-
-    async def handle_sse(request):
-        async with sse.connect_sse(
-            request.scope, request.receive, request._send
-        ) as streams:
-            await server.run(
-                streams[0], streams[1], server.create_initialization_options()
-            )
+    session_manager = StreamableHTTPSessionManager(
+        app=server,
+        stateless=True,
+        json_response=True,
+    )
 
     from auth.admin_api import login, me, list_users, add_user, update_user, remove_user, list_projects
     from starlette.middleware import Middleware
     from starlette.middleware.cors import CORSMiddleware
 
-    app = Starlette(
+    @contextlib.asynccontextmanager
+    async def lifespan(app):
+        async with session_manager.run():
+            yield
+
+    starlette_app = Starlette(
         routes=[
             Route("/", homepage),
             Route("/health", health),
-            Route("/sse", endpoint=handle_sse),
-            Mount("/messages/", app=sse.handle_post_message),
             # Auth API
             Route("/api/auth/login", login, methods=["POST"]),
             Route("/api/auth/me", me, methods=["GET"]),
@@ -310,8 +309,17 @@ def create_app():
         ],
         middleware=[
             Middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"]),
-        ]
+        ],
+        lifespan=lifespan,
     )
+
+    # Wrap with ASGI middleware to handle /mcp directly (avoids Starlette Mount trailing-slash redirect)
+    async def app(scope, receive, send):
+        if scope["type"] == "http" and scope["path"].rstrip("/") == "/mcp":
+            await session_manager.handle_request(scope, receive, send)
+            return
+        await starlette_app(scope, receive, send)
+
     return app
 
 
@@ -323,6 +331,6 @@ if __name__ == "__main__":
 
     app = create_app()
     print(f"SAM MCP Server starting on port {args.port}...")
-    print(f"SSE endpoint: http://localhost:{args.port}/sse")
+    print(f"MCP endpoint: http://localhost:{args.port}/mcp")
     print(f"Health check: http://localhost:{args.port}/health")
     uvicorn.run(app, host="0.0.0.0", port=args.port)
