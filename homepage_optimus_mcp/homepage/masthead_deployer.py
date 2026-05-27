@@ -399,7 +399,7 @@ async def _fetch_and_compress(image: str, max_kb: int = 1024) -> bytes:
                 img_bytes = f.read()
         else:
             async with aiohttp.ClientSession() as session:
-                async with session.get(image, timeout=aiohttp.ClientTimeout(total=15)) as resp:
+                async with session.get(image, timeout=aiohttp.ClientTimeout(total=60)) as resp:
                     img_bytes = await resp.read()
 
         if len(img_bytes) > max_kb * 1024:

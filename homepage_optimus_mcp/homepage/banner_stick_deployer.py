@@ -77,7 +77,7 @@ async def deploy_banner_stick(samaan_client, widget_data: dict, progress_callbac
                         img_raw = f.read()
                 else:
                     async with aiohttp.ClientSession() as img_session:
-                        async with img_session.get(image, timeout=aiohttp.ClientTimeout(total=15)) as img_resp:
+                        async with img_session.get(image, timeout=aiohttp.ClientTimeout(total=60)) as img_resp:
                             img_raw = await img_resp.read()
             except Exception as e:
                 return await _fail(0, "Image fetch", {"error": str(e)})

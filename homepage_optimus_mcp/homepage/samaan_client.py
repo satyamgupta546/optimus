@@ -36,7 +36,7 @@ class SamaanClient:
 
         # Step 1: GET /login/ to get csrftoken
         login_url = f"{self.base_url}{self.endpoints['login']}"
-        async with self._session.get(login_url, timeout=aiohttp.ClientTimeout(total=15)) as resp:
+        async with self._session.get(login_url, timeout=aiohttp.ClientTimeout(total=60)) as resp:
             cookies = resp.cookies
             self.csrf_token = None
             for cookie in cookies.values():
@@ -61,7 +61,7 @@ class SamaanClient:
         async with self._session.post(
             login_url, data=data, headers=headers,
             allow_redirects=False,
-            timeout=aiohttp.ClientTimeout(total=15)
+            timeout=aiohttp.ClientTimeout(total=60)
         ) as resp:
             cookies = resp.cookies
             for cookie in cookies.values():
@@ -256,7 +256,7 @@ class SamaanClient:
         }
 
         try:
-            async with self._session.get(url, headers=headers, timeout=aiohttp.ClientTimeout(total=15)) as resp:
+            async with self._session.get(url, headers=headers, timeout=aiohttp.ClientTimeout(total=60)) as resp:
                 if resp.status == 200:
                     return await resp.json()
                 return {"error": f"GET widget {slug_name} failed: HTTP {resp.status}"}
@@ -287,7 +287,7 @@ class SamaanClient:
                 })
                 jar_temp = http.cookiejar.CookieJar()
                 opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar_temp))
-                resp = await asyncio.to_thread(lambda: opener.open(req, timeout=15))
+                resp = await asyncio.to_thread(lambda: opener.open(req, timeout=60))
                 data = json.loads(resp.read())
 
                 items = []

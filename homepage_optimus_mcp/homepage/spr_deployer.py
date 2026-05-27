@@ -242,7 +242,7 @@ async def deploy_spr(samaan_client, widget_data: dict, progress_callback=None) -
                     # Remote URL
                     import aiohttp as aio_mod
                     async with aio_mod.ClientSession() as img_session:
-                        async with img_session.get(image, timeout=aio_mod.ClientTimeout(total=15)) as img_resp:
+                        async with img_session.get(image, timeout=aio_mod.ClientTimeout(total=60)) as img_resp:
                             img_bytes = await img_resp.read()
 
                 # Compress if > 1MB

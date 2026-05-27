@@ -31,7 +31,7 @@ async def to_hindi(text: str) -> str:
             "q": text,
         })
         req = urllib.request.Request(f"{url}?{params}", headers={"User-Agent": "SAM-Bot/1.0"})
-        resp = await asyncio.to_thread(lambda: urllib.request.urlopen(req, timeout=10))
+        resp = await asyncio.to_thread(lambda: urllib.request.urlopen(req, timeout=30))
         data = json.loads(resp.read())
         hindi = data[0][0][0]
         _cache[text] = hindi
