@@ -28,6 +28,13 @@ async def handle_widget(arguments: dict, configs: dict) -> dict:
         return {"error": f"widget.{action} is not a valid action. Options: create, edit, list, get, duplicate, history"}
 
 
+_WIDGET_TYPE_MAP = {
+    "spr": "product_rail", "dpr": "product_rail",
+    "banner_scroll": "collection_banner", "banner_stick": "collection_banner",
+    "primary_masthead": "masthead", "secondary_masthead": "masthead",
+}
+
+
 async def _create(args: dict, configs: dict) -> dict:
     """Create a new widget. Validates required fields, asks for missing ones."""
     missing = []
@@ -185,6 +192,25 @@ async def _create(args: dict, configs: dict) -> dict:
     if result.get("status") == "deployed":
         log_action("sam_mcp", "widget.create", final_slug, {"type": widget_type, "env": env}, result, "success")
         log_slug_event(final_slug, "created", "sam_mcp", {"type": widget_type, "states": states})
+
+        # Save to BigQuery canvas_widgets for tracking
+        try:
+            from homepage.bq_client import BQClient
+            bq = BQClient()
+            deployed_slug = result.get("spr_slug") or result.get("carousel_slug") or result.get("category_slug") or result.get("masthead_slug") or final_slug
+            bq.create_widget({
+                "type": _WIDGET_TYPE_MAP.get(widget_type, widget_type),
+                "slug": deployed_slug,
+                "env": env,
+                "title": title,
+                "pnc": {"rows": rows, "is_optimized": is_optimized},
+                "config": {"start_time": start_time, "end_time": end_time, "page_type": page_type, "states": states},
+                "products": product_list,
+                "author": "sam_mcp",
+            })
+        except Exception as bq_err:
+            pass  # Non-blocking — widget is deployed even if BQ save fails
+
         return {
             "status": "deployed",
             "message": f"Widget deployed on {env}!",
@@ -227,11 +253,11 @@ async def _edit(args: dict, configs: dict) -> dict:
     if not env:
         return {"status": "missing_env", "message": "Which environment? PROD or UAT?", "options": ["PROD", "UAT"]}
 
-    slug = args.get("slug")
+    slug = args.get("slug") or args.get("slug_or_id")
     fields = args.get("fields_to_update")
 
     if not slug:
-        return {"error": "widget.edit requires 'slug' parameter."}
+        return {"error": "widget.edit requires 'slug' (or 'slug_or_id') parameter."}
     if not fields:
         return {"error": "widget.edit requires 'fields_to_update'. Options: heading, start_time, end_time, product_list, text_en"}
 

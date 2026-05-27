@@ -30,9 +30,11 @@ CONFIGS_DIR = BASE_DIR / "configs"
 
 
 def load_config(name: str) -> dict:
-    path = CONFIGS_DIR / name
-    if path.exists():
-        return json.loads(path.read_text())
+    # Check configs/ first, then homepage/ as fallback
+    for folder in [CONFIGS_DIR, BASE_DIR / "homepage"]:
+        path = folder / name
+        if path.exists():
+            return json.loads(path.read_text())
     return {}
 
 
