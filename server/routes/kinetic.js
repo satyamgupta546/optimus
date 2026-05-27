@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import * as SubmissionService from '../services/SubmissionService.js';
-import { isAvailable } from '../services/SupabaseService.js';
+import { isAvailable } from '../services/BigQueryService.js';
 import * as WidgetData from '../services/WidgetDataService.js';
 
 const router = Router();
@@ -9,7 +9,7 @@ const router = Router();
 router.get('/health', (_req, res) => {
   res.json({
     available: isAvailable(),
-    backend: 'supabase',
+    backend: 'bigquery',
     timestamp: new Date().toISOString(),
   });
 });
@@ -37,7 +37,7 @@ router.get('/history', async (req, res, next) => {
       }
     }
 
-    res.json({ rows, count: rows.length, source: 'supabase' });
+    res.json({ rows, count: rows.length, source: 'bigquery' });
   } catch (err) { next(err); }
 });
 
@@ -50,7 +50,7 @@ router.get('/search-widgets', async (req, res, next) => {
     }
 
     const widgets = await WidgetData.listWidgets(req.env, { slug: q.trim() });
-    res.json({ rows: widgets, count: widgets.length, source: 'supabase' });
+    res.json({ rows: widgets, count: widgets.length, source: 'bigquery' });
   } catch (err) { next(err); }
 });
 
@@ -108,7 +108,7 @@ router.post('/deploy-sync', async (req, res, next) => {
       synced++;
     }
 
-    res.json({ synced, source: 'supabase' });
+    res.json({ synced, source: 'bigquery' });
   } catch (err) { next(err); }
 });
 

@@ -67,7 +67,7 @@ const WidgetHistory = ({ onClose }) => {
     const fetchData = useCallback(async (d) => {
         setLoading(true);
         try {
-            // Fetch from both Supabase and Kinetic in parallel
+            // Fetch from both BigQuery and Kinetic in parallel
             const [dbResult, kineticResult] = await Promise.allSettled([
                 LocalApiService.getRequestsByDate(d),
                 LocalApiService.getKineticHistory({ startDate: d, endDate: d }),
@@ -75,14 +75,14 @@ const WidgetHistory = ({ onClose }) => {
 
             const dbRequests = dbResult.status === 'fulfilled' ? dbResult.value : [];
 
-            // Merge Kinetic rows as supplementary data (Supabase is authoritative)
+            // Merge Kinetic rows as supplementary data (BigQuery is authoritative)
             const kineticRows = kineticResult.status === 'fulfilled' ? (kineticResult.value?.rows || []) : [];
 
             // Group Kinetic rows by request_id to form pseudo-request objects
             const dbRequestIds = new Set(dbRequests.map(r => r.id));
             const kineticByRequest = {};
             for (const row of kineticRows) {
-                if (dbRequestIds.has(row.request_id)) continue; // already in Supabase
+                if (dbRequestIds.has(row.request_id)) continue; // already in BigQuery
                 if (!kineticByRequest[row.request_id]) {
                     kineticByRequest[row.request_id] = {
                         id: row.request_id,
@@ -106,8 +106,8 @@ const WidgetHistory = ({ onClose }) => {
                 });
             }
 
-            // Tag Supabase requests
-            const taggedDb = dbRequests.map(r => ({ ...r, _source: 'supabase' }));
+            // Tag BigQuery requests
+            const taggedDb = dbRequests.map(r => ({ ...r, _source: 'bigquery' }));
             const mergedRequests = [...taggedDb, ...Object.values(kineticByRequest)];
 
             setRequests(mergedRequests);

@@ -20,7 +20,7 @@ const componentMap = {
     'Banner With Product Listing': CollectionBanner,
     'Category Grid': CollectionBanner,
     'Collection Banner': CollectionBanner,
-    // Supabase slug-style type names
+    // BigQuery slug-style type names
     'product_rail': SingleProductRow,
     'collection_banner': CollectionBanner,
     'masthead': PrimaryMasthead,

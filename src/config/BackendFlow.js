@@ -7,7 +7,7 @@
  * Wiki Reference: wiki/Backend-work-flow.md
  *
  * Architecture:
- *   UI (Canvas) → Express Backend (PENDING) → Supabase DB (Validation + Status Update)
+ *   UI (Canvas) → Express Backend (PENDING) → BigQuery DB (Validation + Status Update)
  *   → Backend API (POST/PATCH widgets, requests, approvals)
  */
 
@@ -92,13 +92,13 @@ export const SUBMIT_PAYLOAD_SCHEMA = {
 };
 
 // ── Database Fields ──
-// Maps payload data to their Supabase DB table fields.
+// Maps payload data to their BigQuery DB table fields.
 export const DB_FIELDS = {
     widget: {
         env: { type: 'string', default: 'PROD', values: ['UAT', 'PROD'], description: 'Environment — same slug allowed in both. Unique constraint: @@unique([slug, env])' },
     },
     request: {
-        id: { type: 'uuid', auto: true, description: 'Supabase auto-generated UUID' },
+        id: { type: 'uuid', auto: true, description: 'BigQuery auto-generated UUID' },
         submittedBy: { type: 'string', source: 'req.user.id', description: 'User FK from auth middleware' },
         type: { type: 'string', default: 'Homepage Update' },
         status: { type: 'enum', values: ['DRAFT', 'PENDING', 'APPROVED', 'REJECTED'] },
@@ -302,17 +302,17 @@ export const DEPLOY_CONFIG = {
 
 // ── Approve vs Deploy Distinction ─────────────────────────────────────────
 // IMPORTANT: Approve ≠ Deploy. These are two separate steps.
-//   Approve: Updates Supabase DB status (PENDING → APPROVED). No backend API calls.
+//   Approve: Updates BigQuery DB status (PENDING → APPROVED). No backend API calls.
 //   Deploy:  Makes actual API calls to Django backend (POST widget, mappings, etc.)
 //
 // Three ways to deploy:
-//   1. "Approve" button → only updates Supabase. Then "Deploy" button separately.
-//   2. "Approve & Deploy" button → does both in one click (approve Supabase + deploy backend).
+//   1. "Approve" button → only updates BigQuery. Then "Deploy" button separately.
+//   2. "Approve & Deploy" button → does both in one click (approve BigQuery + deploy backend).
 //   3. "Deploy" button on already-APPROVED requests → re-deploy (manual sync).
 export const APPROVE_DEPLOY_FLOW = {
     approveOnly: {
         service: 'LocalApiService.approveRequest()',
-        effect: 'Supabase status → APPROVED (no backend API calls)',
+        effect: 'BigQuery status → APPROVED (no backend API calls)',
         uiButton: 'Approve',
     },
     deployOnly: {
@@ -322,7 +322,7 @@ export const APPROVE_DEPLOY_FLOW = {
     },
     approveAndDeploy: {
         services: ['LocalApiService.approveRequest()', 'BackendSyncService.deployRequest()'],
-        effect: 'Supabase status → APPROVED + backend API calls in sequence',
+        effect: 'BigQuery status → APPROVED + backend API calls in sequence',
         uiButton: 'Approve & Deploy',
     },
 };
@@ -343,7 +343,7 @@ export const WORKFLOW_SUMMARY = {
     stages: Object.keys(WORKFLOW_STAGES),
     roles: Object.keys(ROLE_PERMISSIONS),
     backend: {
-        type: 'Express + Supabase',
+        type: 'Express + BigQuery',
         port: 3001,
         dbFile: 'server/prisma/optimus.db',
     },

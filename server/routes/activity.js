@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import * as SubmissionService from '../services/SubmissionService.js';
-import { getClient } from '../services/SupabaseService.js';
+import * as BQ from '../services/BigQueryService.js';
 
 const router = Router();
 
@@ -12,14 +12,10 @@ router.get('/', async (req, res, next) => {
     const limit = Math.min(parseInt(req.query.limit, 10) || 50, 200);
     const actionFilter = req.query.action || undefined;
 
-    const sb = getClient();
-    const { data: rows, error } = await sb
-      .from('submissions')
-      .select('request_id, slug, history, created_at')
-      .order('created_at', { ascending: false })
-      .limit(200);
-
-    if (error) throw new Error(`Supabase: ${error.message}`);
+    const rows = await BQ.selectRows('submissions', {
+      orderBy: 'created_at DESC',
+      limit: 200,
+    });
 
     // Flatten all history entries across submissions
     const allLogs = [];

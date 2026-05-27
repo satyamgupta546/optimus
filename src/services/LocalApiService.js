@@ -1,5 +1,5 @@
 /**
- * LocalApiService — Frontend client for the local Express + Supabase backend.
+ * LocalApiService — Frontend client for the local Express + BigQuery backend.
  *
  * All requests go to /api/local/* (proxied to localhost:3001 via Vite).
  * Auth is sent via X-Optimus-User and X-Optimus-Role headers from localStorage.
@@ -93,7 +93,7 @@ export const LocalApiService = {
   getCatalog: () => request('/kinetic/catalog'),
   getCatalogBatch: (codes) => request(`/kinetic/catalog/batch?codes=${codes.join(',')}`),
 
-  // ── Widget Search (from Mirror/Supabase) ──
+  // ── Widget Search (from Mirror/BigQuery) ──
   searchWidgets: (q) => request(`/kinetic/search-widgets?q=${encodeURIComponent(q)}`),
 
   // ── Activity ──
@@ -150,7 +150,7 @@ export const LocalApiService = {
   updateHeaderWidgets: (data) =>
     request('/header-widgets', { method: 'PUT', body: JSON.stringify(data) }),
 
-  // ── Kinetic (Supabase) ──
+  // ── Kinetic (BigQuery) ──
   getKineticHealth: () => request('/kinetic/health'),
   getKineticHistory: (params) => {
     const qs = new URLSearchParams(params).toString();

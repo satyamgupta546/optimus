@@ -329,16 +329,16 @@ const RequestQueue = ({ onClose, onApprove, onReject }) => {
                     result.summary || 'Deployed successfully!',
                     { icon: '🚀', duration: 4000 }
                 );
-                // Update Supabase status — only if not already approved
+                // Update DB status — only if not already approved
                 if (req.status !== 'APPROVED' && req.status !== 'Complete') {
                     try {
                         await LocalApiService.approveRequest(req.id);
                     } catch (e) {
-                        console.warn('[Deploy] Supabase status update failed (non-fatal):', e.message);
+                        console.warn('[Deploy] DB status update failed (non-fatal):', e.message);
                     }
                 }
                 fetchRequests();
-                // Fire-and-forget: sync deploy slugs to Supabase
+                // Fire-and-forget: sync deploy slugs to BigQuery
                 if (result.results?.length) {
                     const deployWidgets = result.results
                         .filter(r => r.status === 'ok' && r.slug)
@@ -391,7 +391,7 @@ const RequestQueue = ({ onClose, onApprove, onReject }) => {
         const loadingToast = toast.loading('Approving & deploying...');
 
         try {
-            // Step 1: Approve in Supabase
+            // Step 1: Approve in BigQuery
             const selectedWidgetIds = (req.widgets || [])
                 .filter((_, i) => selectedIndices.has(i))
                 .map(w => w.id)
@@ -409,7 +409,7 @@ const RequestQueue = ({ onClose, onApprove, onReject }) => {
             toast.dismiss(deployToast);
             if (result.success) {
                 toast.success(result.summary || 'Deployed successfully!', { icon: '🚀', duration: 4000 });
-                // Fire-and-forget: sync deploy slugs to Supabase
+                // Fire-and-forget: sync deploy slugs to BigQuery
                 if (result.results?.length) {
                     const deployWidgets = result.results
                         .filter(r => r.status === 'ok' && r.slug)

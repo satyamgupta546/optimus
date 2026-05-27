@@ -6,7 +6,7 @@ import { prefetchProducts } from '../hooks/useCatalog';
 
 /**
  * Fetch Widget Component
- * Allows users to fetch widgets from CMS API or Mirror (Supabase)
+ * Allows users to fetch widgets from CMS API or Mirror (BigQuery)
  */
 export default function FetchWidget({ onWidgetFetched }) {
     const [slugName, setSlugName] = useState('');
@@ -15,7 +15,7 @@ export default function FetchWidget({ onWidgetFetched }) {
     const [source, setSource] = useState('db'); // 'db' | 'api'
     const [dbResults, setDbResults] = useState(null); // search results from Mirror
 
-    // ── Mirror (Supabase) Search ──
+    // ── Mirror (BigQuery) Search ──
     const handleDbSearch = async () => {
         if (!slugName.trim()) { setError('Please enter a slug or title'); return; }
         setLoading(true); setError(''); setDbResults(null);
@@ -32,7 +32,7 @@ export default function FetchWidget({ onWidgetFetched }) {
         } finally { setLoading(false); }
     };
 
-    // Map Supabase widget_type values to app-recognized types
+    // Map BigQuery widget_type values to app-recognized types
     const typeNormalize = {
         'product_rail': 'product_rail',
         'single_product_row': 'product_rail',
@@ -354,7 +354,7 @@ export default function FetchWidget({ onWidgetFetched }) {
 
             <div className="mt-2 text-xs text-gray-500">
                 {source === 'db'
-                    ? 'Search submitted widgets from Mirror (Supabase) by slug or title'
+                    ? 'Search submitted widgets from Mirror (BigQuery) by slug or title'
                     : 'Enter the slug name of any widget or widget item to fetch and preview it'}
             </div>
         </div>

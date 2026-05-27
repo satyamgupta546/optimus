@@ -3,7 +3,7 @@ import { X, Search, RefreshCw, ArrowUpDown, ArrowUp, ArrowDown, Map, Loader2 } f
 import { LocalApiService } from '../../services/LocalApiService';
 
 /**
- * HomepageMappingDashboard — View all widgets from Supabase database.
+ * HomepageMappingDashboard — View all widgets from BigQuery database.
  * Toolbar: search, refresh
  * Sortable table with status badges, pagination
  */
@@ -114,7 +114,7 @@ const HomepageMappingDashboard = ({ onClose }) => {
                                         {ACTIVE_ENV === 'UAT' ? 'UAT' : 'PROD'}
                                     </span>
                                 </div>
-                                <p className="text-[11px] text-slate-400 mt-0.5">Supabase widget database</p>
+                                <p className="text-[11px] text-slate-400 mt-0.5">BigQuery widget database</p>
                             </div>
                         </div>
                         <button onClick={onClose} className="p-1.5 hover:bg-slate-100 rounded-lg transition-colors text-slate-400 hover:text-slate-600">

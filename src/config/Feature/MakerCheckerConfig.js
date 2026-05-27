@@ -157,7 +157,7 @@ export const SUBMIT_PAYLOAD = {
     slugHandling: {
         description: 'Slug created by SlugBuilder is passed through as-is — no uniqueness check',
         validation: 'Required field check only (slug cannot be empty)',
-        storage: 'Slug stored in Supabase (Kinetic) as source of truth + Supabase Widget for versions/comments',
+        storage: 'Slug stored in BigQuery (Kinetic) as source of truth + BigQuery Widget for versions/comments',
     },
     headerCleaning: 'File objects removed from headerWidgets for serialization',
     service: 'LocalApiService.createRequest() + LocalApiService.submitRequest()',
@@ -207,12 +207,12 @@ export const CHECKER_ACTIONS = {
         stateWiseProducts: 'Creates per-state sub-category items when widget.stateProducts has multiple keys',
     },
     approveAndDeploy: {
-        description: 'One-click: approve in Supabase (Kinetic) + deploy to Django backend in sequence',
+        description: 'One-click: approve in BigQuery (Kinetic) + deploy to Django backend in sequence',
         steps: ['LocalApiService.approveRequest()', 'BackendSyncService.deployRequest()'],
         requiresCsrf: true,
         csrfSource: 'Auto-read from session cookie via getCsrfToken() (AuthService.js)',
         toast: 'Approved! → Deploying...',
-        note: 'Approve updates Supabase status only. Deploy makes actual API calls to Django backend.',
+        note: 'Approve updates BigQuery status only. Deploy makes actual API calls to Django backend.',
     },
 };
 
@@ -236,12 +236,12 @@ export const APPROVAL_LOCK = {
 };
 
 // Express backend (server/routes/requests.js) handles approval for each widget type
-// Source of truth: Supabase (Kinetic) — Supabase Widget.status still updated for versions/comments
+// Source of truth: BigQuery (Kinetic) — BigQuery Widget.status still updated for versions/comments
 export const APPROVAL_ROUTING = {
     source: 'server/routes/requests.js',
-    dataStore: 'Supabase (Kinetic) — widget_submissions / widget_submissions_uat tables',
+    dataStore: 'BigQuery (Kinetic) — widget_submissions / widget_submissions_uat tables',
     entryFunction: 'POST /api/local/requests/:id/approve',
-    authentication: 'X-Optimus-User + X-Optimus-Env headers — auth middleware upserts User in Supabase, resolves role per-environment',
+    authentication: 'X-Optimus-User + X-Optimus-Env headers — auth middleware upserts User in BigQuery, resolves role per-environment',
     widgetRoutes: {
         'Single Product Row Optimize': { handler: 'server/routes/requests.js', description: 'PLP Ecosystem + Homepage Row' },
         'Single Product Row': { handler: 'server/routes/requests.js', description: 'Standard Widget + Page Layout' },
@@ -290,11 +290,11 @@ export const WIDGET_ORIGIN = {
 };
 
 // ── Activity Logging ──
-// Source of truth: Supabase activity_log table (via KineticSyncService)
+// Source of truth: BigQuery activity_log table (via KineticSyncService)
 // Request actions (submit/approve/reject/reopen) use BLOCKING writes (throw on failure)
 // Widget CRUD actions use fire-and-forget (logActivitySafe — never throws)
 export const ACTIVITY_LOG = {
-    source: 'Supabase activity_log table (server/services/KineticSyncService.js)',
+    source: 'BigQuery activity_log table (server/services/KineticSyncService.js)',
     frontendContext: 'src/context/ActivityLogContext.jsx',
     maxEntries: 100,
     actions: {
@@ -359,7 +359,7 @@ export const MASTHEAD_ACTIONS = {
 export const ERROR_HANDLING = {
     submitFails: { behavior: 'Stays in DRAFT', toast: 'Failed to submit' },
     approvalFails: { behavior: 'Stays PENDING', toast: 'Failed to approve: {error}' },
-    kineticUnavailable: { behavior: '502 error — source of truth unavailable', toast: 'Supabase write failed: {error}' },
+    kineticUnavailable: { behavior: '502 error — source of truth unavailable', toast: 'BigQuery write failed: {error}' },
     individualWidgetFails: { behavior: 'Backend returns 400 with validation error details', toast: null },
     authExpired: { behavior: 'Auth middleware rejects request', fix: 'Re-login required' },
     unsupportedType: { behavior: 'Skipped during approval routing', toast: null },
@@ -381,12 +381,12 @@ export const UI_COMPONENTS = {
     BackendSyncService: { file: 'src/services/BackendSyncService.js', role: 'Direct backend deployment' },
     LocalApiService: { file: 'src/services/LocalApiService.js', role: 'Express backend API client (submit, approve, widgets, users, catalog)' },
     ValidationService: { file: 'src/services/ValidationService.js', role: 'Pre-submit validation + slug uniqueness checks' },
-    PrismaSchema: { file: 'server/prisma/schema.prisma', role: 'Database models (Widget, WidgetVersion, User, CheckerList, etc. — Request/RequestWidget/ActivityLog moved to Supabase)' },
-    KineticSetup: { file: 'server/scripts/kinetic-setup.js', role: 'Supabase table + query definitions (widget_submissions, activity_log)' },
-    KineticSyncService: { file: 'server/services/KineticSyncService.js', role: 'Blocking + fire-and-forget Supabase operations' },
+    PrismaSchema: { file: 'server/prisma/schema.prisma', role: 'Database models (Widget, WidgetVersion, User, CheckerList, etc. — Request/RequestWidget/ActivityLog moved to BigQuery)' },
+    KineticSetup: { file: 'server/scripts/kinetic-setup.js', role: 'BigQuery table + query definitions (widget_submissions, activity_log)' },
+    KineticSyncService: { file: 'server/services/KineticSyncService.js', role: 'Blocking + fire-and-forget BigQuery operations' },
     SnapshotPreview: { file: 'src/components/Dashboard/SnapshotPreview.jsx', role: 'Visual widget renderer from snapshot — used in WidgetHistory Preview' },
     MapToPageModal: { file: 'src/components/Dashboard/MapToPageModal.jsx', role: 'Post-deploy Layer 2 mapping modal — maps deployed widget slugs to page layout (Checker only)' },
     WidgetHistory: { file: 'src/components/Dashboard/WidgetHistory.jsx', role: 'Date-based widget history — browse submissions by date, load to canvas (spreads ALL snapshot fields), edit, submit/approve' },
-    StateManagerModal: { file: 'src/components/AdminPanel/StateManagerModal.jsx', role: 'Manage states/cities — backend-persisted via Location model (Supabase DB)' },
+    StateManagerModal: { file: 'src/components/AdminPanel/StateManagerModal.jsx', role: 'Manage states/cities — backend-persisted via Location model (BigQuery DB)' },
     LocationService: { file: 'src/services/LocationService.js', role: 'Async state definitions fetcher with in-memory cache — replaces localStorage-based sync approach' },
 };

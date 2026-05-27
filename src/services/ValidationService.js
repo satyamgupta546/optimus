@@ -3,7 +3,7 @@
  *
  * Runs WidgetRegistry.getValidationRules() per widget before submission.
  * Slug is passed through as-is — no uniqueness check, no auto-increment.
- * The same slug created by SlugBuilder is stored directly in Supabase.
+ * The same slug created by SlugBuilder is stored directly in BigQuery.
  *
  * Wiki Reference: wiki/Backend-work-flow.md — Pre-Submit Validation
  */
@@ -76,7 +76,7 @@ export const validateWidgets = (widgets = []) => {
 /**
  * validateAndCheckSlugs(widgets)
  *
- * Field-level validation only. Slug is passed through as-is to Supabase.
+ * Field-level validation only. Slug is passed through as-is to BigQuery.
  * No uniqueness check — the slug created by SlugBuilder is the final slug.
  *
  * Returns { valid: bool, errors: [...] }
