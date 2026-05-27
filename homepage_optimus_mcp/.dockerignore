@@ -1,0 +1,7 @@
+__pycache__
+*.pyc
+.git
+.env
+configs/tokens.json
+configs/audit_log.json
+admin-ui/node_modules

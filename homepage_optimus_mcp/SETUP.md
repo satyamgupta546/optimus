@@ -121,6 +121,60 @@ Restart Claude Desktop. You'll see SAM tools available.
 
 ---
 
+## Cloud Run Deployment (for team sharing)
+
+Once deployed, team members just paste the URL in Claude Desktop — no local setup needed.
+
+### Deploy to Cloud Run
+
+```bash
+cd optimus/homepage_optimus_mcp
+
+# Build & deploy (one command)
+gcloud run deploy sam-mcp \
+  --source . \
+  --project apna-mart-data \
+  --region asia-south1 \
+  --allow-unauthenticated \
+  --set-env-vars "SAMAAN_UAT_USER=vicky.das,SAMAAN_UAT_PASS=qwerty@123,SAMAAN_PROD_USER=Automation,SAMAAN_PROD_PASS=Qwerty@123" \
+  --service-account backend-bq-service@apna-mart-data.iam.gserviceaccount.com \
+  --memory 512Mi \
+  --timeout 300 \
+  --session-affinity
+```
+
+This gives you a URL like: `https://sam-mcp-xxxxx-el.a.run.app`
+
+### Team Member Setup (30 seconds)
+
+1. Open Claude Desktop → Settings → Connectors → Add Custom
+2. Paste: `https://sam-mcp-xxxxx-el.a.run.app/sse`
+3. Done. Start chatting.
+
+Or via config file:
+```json
+{
+  "mcpServers": {
+    "sam": {
+      "command": "npx",
+      "args": ["mcp-remote", "https://sam-mcp-xxxxx-el.a.run.app/sse"]
+    }
+  }
+}
+```
+
+### Key Cloud Run Settings
+
+| Setting | Value | Why |
+|---------|-------|-----|
+| `--allow-unauthenticated` | Public access | Claude Desktop needs direct HTTP |
+| `--service-account` | backend-bq-service | Has BigQuery + GCS access |
+| `--session-affinity` | Enabled | SSE needs sticky sessions |
+| `--timeout 300` | 5 min | Deploy operations take time |
+| `--memory 512Mi` | 512MB | Enough for Python + BQ client |
+
+---
+
 ## Need Help?
 
 - Type "help" in Claude Desktop — SAM will show all available commands

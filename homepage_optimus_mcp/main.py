@@ -316,8 +316,9 @@ def create_app():
 
 
 if __name__ == "__main__":
+    import os as _os
     parser = argparse.ArgumentParser(description="SAM MCP Server")
-    parser.add_argument("--port", type=int, default=8080, help="Port to run on")
+    parser.add_argument("--port", type=int, default=int(_os.environ.get("PORT", 8080)), help="Port to run on")
     args = parser.parse_args()
 
     app = create_app()

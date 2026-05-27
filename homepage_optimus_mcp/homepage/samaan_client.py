@@ -6,16 +6,20 @@ Auto re-login on 403 session expiry.
 import aiohttp
 import asyncio
 import json
+import os
 
 
 class SamaanClient:
     def __init__(self, config: dict, env: str = None):
         self.env = env or config.get("default_env", "UAT")
         self.base_url = config.get("environments", {}).get(self.env, config.get("environments", {}).get("UAT", ""))
-        creds = config["credentials"].get(self.env, config["credentials"].get("UAT", {}))
-        self.username = creds["username"]
-        self.password = creds["password"]
-        self.endpoints = config["endpoints"]
+
+        # Credentials: env vars take priority over config file
+        env_prefix = "SAMAAN_PROD" if self.env == "PROD" else "SAMAAN_UAT"
+        creds = config.get("credentials", {}).get(self.env, config.get("credentials", {}).get("UAT", {}))
+        self.username = os.environ.get(f"{env_prefix}_USER") or creds.get("username", "")
+        self.password = os.environ.get(f"{env_prefix}_PASS") or creds.get("password", "")
+        self.endpoints = config.get("endpoints", {})
         self.csrf_token = None
         self.session_id = None
         self._session = None
