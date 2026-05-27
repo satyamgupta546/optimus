@@ -20,11 +20,17 @@ router.get('/', async (req, res, next) => {
     // Flatten all history entries across submissions
     const allLogs = [];
     for (const row of (rows || [])) {
-      for (const h of (row.history || [])) {
+      let history = row.history || [];
+      if (typeof history === 'string') {
+        try { history = JSON.parse(history); } catch { history = []; }
+      }
+      if (!Array.isArray(history)) history = [];
+      for (const h of history) {
+        const at = typeof h.at === 'object' && h.at?.value ? h.at.value : String(h.at || '');
         allLogs.push({
           action: h.action,
           by: h.by || '',
-          at: h.at || '',
+          at,
           requestId: row.request_id,
           slug: row.slug,
           reason: h.reason || undefined,
@@ -33,7 +39,7 @@ router.get('/', async (req, res, next) => {
     }
 
     // Sort by time descending
-    allLogs.sort((a, b) => (b.at || '').localeCompare(a.at || ''));
+    allLogs.sort((a, b) => b.at.localeCompare(a.at));
 
     // Filter by action
     const filtered = actionFilter ? allLogs.filter(l => l.action === actionFilter) : allLogs;
