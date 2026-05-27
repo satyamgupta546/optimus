@@ -256,6 +256,58 @@ async def list_projects(request: Request):
     return JSONResponse({"projects": result, "count": len(result)})
 
 
+# ── Audit Log ──
+
+async def list_audit(request: Request):
+    """GET /api/admin/audit — recent audit log entries."""
+    user = _get_user_from_request(request)
+    if not user:
+        return JSONResponse({"error": "Unauthorized"}, status_code=401)
+
+    audit_file = CONFIGS_DIR / "audit_log.json"
+    logs = json.loads(audit_file.read_text()) if audit_file.exists() else []
+    # Latest first, limit 200
+    logs = sorted(logs, key=lambda x: x.get("timestamp", 0), reverse=True)[:200]
+    return JSONResponse({"logs": logs, "count": len(logs)})
+
+
+# ── Widgets (from BigQuery) ──
+
+async def list_widgets_admin(request: Request):
+    """GET /api/admin/widgets — list widgets from BigQuery."""
+    user = _get_user_from_request(request)
+    if not user:
+        return JSONResponse({"error": "Unauthorized"}, status_code=401)
+
+    env = request.query_params.get("env", "UAT")
+    try:
+        from homepage.bq_client import BQClient
+        bq = BQClient()
+        widgets = bq.list_widgets(env)
+        result = [{
+            "slug": w.get("slug"), "type": w.get("type"), "title": w.get("title"),
+            "status": w.get("status"), "env": env,
+            "created_at": str(w.get("created_at", "")),
+        } for w in widgets]
+        return JSONResponse({"widgets": result, "count": len(result)})
+    except Exception as e:
+        return JSONResponse({"error": str(e), "widgets": [], "count": 0})
+
+
+# ── OAuth Clients ──
+
+async def list_oauth_clients(request: Request):
+    """GET /api/admin/oauth-clients — list registered OAuth clients."""
+    admin = _require_admin(request)
+    if isinstance(admin, JSONResponse):
+        return admin
+
+    clients_file = CONFIGS_DIR / "oauth_clients.json"
+    clients = json.loads(clients_file.read_text()) if clients_file.exists() else {}
+    result = [{"client_id": cid, **{k: v for k, v in c.items() if k != "client_secret"}} for cid, c in clients.items()]
+    return JSONResponse({"clients": result, "count": len(result)})
+
+
 # ── Helpers ──
 
 def _get_user_from_request(request: Request) -> dict | None:

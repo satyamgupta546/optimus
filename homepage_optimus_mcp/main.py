@@ -14,8 +14,9 @@ from pathlib import Path
 from mcp.server import Server
 from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
 from starlette.applications import Starlette
-from starlette.routing import Route
+from starlette.routing import Route, Mount
 from starlette.responses import JSONResponse
+from starlette.staticfiles import StaticFiles
 import uvicorn
 
 from homepage.widget import handle_widget
@@ -284,7 +285,16 @@ def create_app():
         json_response=True,
     )
 
-    from auth.admin_api import login, me, list_users, add_user, update_user, remove_user, list_projects
+    from auth.admin_api import login, me, list_users, add_user, update_user, remove_user, list_projects, list_audit, list_widgets_admin, list_oauth_clients
+    from auth.oauth import (
+        oauth_protected_resource,
+        oauth_authorization_server,
+        register_client,
+        authorize,
+        token_endpoint,
+        validate_oauth_token,
+        _get_base_url,
+    )
     from starlette.middleware import Middleware
     from starlette.middleware.cors import CORSMiddleware
 
@@ -306,6 +316,17 @@ def create_app():
             Route("/api/admin/users", update_user, methods=["PUT"]),
             Route("/api/admin/users", remove_user, methods=["DELETE"]),
             Route("/api/admin/projects", list_projects, methods=["GET"]),
+            Route("/api/admin/audit", list_audit, methods=["GET"]),
+            Route("/api/admin/widgets", list_widgets_admin, methods=["GET"]),
+            Route("/api/admin/oauth-clients", list_oauth_clients, methods=["GET"]),
+            # Admin UI (static files from admin-ui/dist)
+            Mount("/admin", app=StaticFiles(directory=str(BASE_DIR / "admin-ui" / "dist"), html=True)),
+            # OAuth 2.1
+            Route("/.well-known/oauth-protected-resource/mcp", oauth_protected_resource),
+            Route("/.well-known/oauth-authorization-server", oauth_authorization_server),
+            Route("/register", register_client, methods=["POST"]),
+            Route("/authorize", authorize, methods=["GET", "POST"]),
+            Route("/token", token_endpoint, methods=["POST"]),
         ],
         middleware=[
             Middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"]),
@@ -314,10 +335,51 @@ def create_app():
     )
 
     # Wrap with ASGI middleware to handle /mcp directly (avoids Starlette Mount trailing-slash redirect)
+    # /mcp requires a valid OAuth Bearer token; responds with 401 + discovery header otherwise.
     async def app(scope, receive, send):
         if scope["type"] == "http" and scope["path"].rstrip("/") == "/mcp":
+            # Build base URL from raw ASGI headers for the WWW-Authenticate header
+            raw_headers = dict(scope.get("headers", []))
+            proto = raw_headers.get(b"x-forwarded-proto", b"https").decode()
+            host = (
+                raw_headers.get(b"x-forwarded-host", b"").decode()
+                or raw_headers.get(b"host", b"localhost:8080").decode()
+            )
+            base_url = f"{proto}://{host}"
+
+            auth = raw_headers.get(b"authorization", b"").decode()
+            if not auth.startswith("Bearer "):
+                response = JSONResponse(
+                    {"error": "unauthorized", "error_description": "Bearer token required"},
+                    status_code=401,
+                    headers={
+                        "WWW-Authenticate": (
+                            f'Bearer resource_metadata="{base_url}/.well-known/oauth-protected-resource/mcp"'
+                        )
+                    },
+                )
+                await response(scope, receive, send)
+                return
+
+            token = auth[len("Bearer "):]
+            user = validate_oauth_token(token)
+            if not user:
+                response = JSONResponse(
+                    {"error": "invalid_token", "error_description": "Token invalid or expired"},
+                    status_code=401,
+                    headers={
+                        "WWW-Authenticate": (
+                            f'Bearer resource_metadata="{base_url}/.well-known/oauth-protected-resource/mcp",'
+                            ' error="invalid_token"'
+                        )
+                    },
+                )
+                await response(scope, receive, send)
+                return
+
             await session_manager.handle_request(scope, receive, send)
             return
+
         await starlette_app(scope, receive, send)
 
     return app
