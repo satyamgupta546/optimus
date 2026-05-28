@@ -99,6 +99,11 @@ export function bustUserCache(email) {
 // WIDGETS (canvas_widgets table)
 // ══════════════════════════════════════════════════════════════
 
+function safeParse(val, fallback) {
+  if (typeof val === 'string') { try { return JSON.parse(val); } catch { return fallback; } }
+  return val || fallback;
+}
+
 function parseWidget(row) {
   if (!row) return null;
   return {
@@ -111,9 +116,9 @@ function parseWidget(row) {
     titleHi: row.title_hi || '',
     status: row.status || 'DRAFT',
     sortOrder: row.sort_order ?? 0,
-    pnc: row.pnc || {},
-    config: row.config || {},
-    products: row.products || [],
+    pnc: safeParse(row.pnc, {}),
+    config: safeParse(row.config, {}),
+    products: safeParse(row.products, []),
     createdBy: row.author || '',
     creator: { email: row.author || '', name: (row.author || '').split('@')[0] },
     createdAt: row.created_at || '',
