@@ -151,8 +151,8 @@ router.post('/', async (req, res, next) => {
     const created = await SubService.fetchRequestById(newRequestId, req.env);
     res.status(201).json(created);
   } catch (err) {
-    console.error('[requests POST /] Error:', err.message, err.stack);
-    return res.status(500).json({ error: 'Submit failed', details: err.message });
+    console.error('[requests POST /] Error:', err.message || err, err.stack);
+    return res.status(500).json({ error: 'Submit failed', details: err.message || String(err), stack: (err.stack || '').split('\n').slice(0, 3) });
   }
 });
 
