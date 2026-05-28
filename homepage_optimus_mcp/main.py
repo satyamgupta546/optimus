@@ -118,23 +118,30 @@ async def list_tools():
         ),
         Tool(
             name="sam_bulk",
-            description="Bulk item code operations (coming soon). Currently not implemented.",
+            description="Bulk update product codes for widget items. Pass items list with slug + products. Use dry_run to preview, upload to execute.",
             inputSchema={
                 "type": "object",
                 "properties": {
                     "action": {
                         "type": "string",
                         "enum": ["upload", "dry_run"],
-                        "description": "Action to perform"
+                        "description": "upload = execute on Samaan, dry_run = preview CSV only"
                     },
-                    "sheet_url": {"type": "string", "description": "Google Sheet URL"},
-                    "states": {
+                    "items": {
                         "type": "array",
-                        "items": {"type": "string"},
-                        "description": "States to upload (default: all)"
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "slug": {"type": "string", "description": "Widget item slug_name"},
+                                "products": {"type": "string", "description": "Comma-separated item codes"}
+                            },
+                            "required": ["slug", "products"]
+                        },
+                        "description": "List of widget items with product codes to upload"
                     },
-                    "tab": {"type": "string", "description": "Specific sheet tab to read"},
-                    "env": {"type": "string", "enum": ["PROD", "UAT"], "description": "Environment: PROD or UAT (default: UAT)"}
+                    "env": {"type": "string", "enum": ["PROD", "UAT"], "description": "Environment: PROD or UAT (default: UAT)"},
+                    "confirm": {"type": "boolean", "description": "Set true to execute upload"},
+                    "prod_ack": {"type": "boolean", "description": "Required for PROD uploads"}
                 },
                 "required": ["action"]
             }
