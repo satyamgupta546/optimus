@@ -203,10 +203,10 @@ router.post('/:id/approve', async (req, res, next) => {
       return res.status(409).json({ error: err.message });
     }
     console.error('[requests POST /:id/approve] Error:', err.message);
-    if (err.message.includes('BigQuery') || err.message.includes('database')) {
-      return res.status(502).json({ error: 'Database write failed', details: err.message });
+    if (err.message && err.message.includes('streaming buffer')) {
+      return res.status(409).json({ error: 'Widget was just submitted. Please wait 1-2 minutes before approving (BigQuery streaming buffer delay).' });
     }
-    next(err);
+    return res.status(500).json({ error: 'Approve failed', details: err.message || String(err) });
   }
 });
 
@@ -251,10 +251,10 @@ router.post('/:id/reject', async (req, res, next) => {
       return res.status(409).json({ error: err.message });
     }
     console.error('[requests POST /:id/reject] Error:', err.message);
-    if (err.message.includes('BigQuery') || err.message.includes('database')) {
-      return res.status(502).json({ error: 'Database write failed', details: err.message });
+    if (err.message && err.message.includes('streaming buffer')) {
+      return res.status(409).json({ error: 'Please wait 1-2 minutes before rejecting (BigQuery streaming buffer delay).' });
     }
-    next(err);
+    return res.status(500).json({ error: 'Reject failed', details: err.message || String(err) });
   }
 });
 
@@ -288,10 +288,10 @@ router.post('/:id/reopen', async (req, res, next) => {
     res.json({ id: req.params.id, status: 'PENDING', updatedAt: new Date().toISOString() });
   } catch (err) {
     console.error('[requests POST /:id/reopen] Error:', err.message);
-    if (err.message.includes('BigQuery') || err.message.includes('database')) {
-      return res.status(502).json({ error: 'Database write failed', details: err.message });
+    if (err.message && err.message.includes('streaming buffer')) {
+      return res.status(409).json({ error: 'Please wait 1-2 minutes before reopening (BigQuery streaming buffer delay).' });
     }
-    next(err);
+    return res.status(500).json({ error: 'Reopen failed', details: err.message || String(err) });
   }
 });
 
