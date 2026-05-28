@@ -122,27 +122,63 @@ class SamaanClient:
 
     # ── Widget Item ──
 
-    async def create_widget_item(self, form_data: aiohttp.FormData) -> dict:
-        """POST /api/app/post_widget_item/ — multipart form."""
-        return await self._post_form("widget_item", form_data)
+    async def create_widget_item(self, form_data) -> dict:
+        """POST /api/app/post_widget_item/ — accepts FormData or dict of fields."""
+        fields = self._extract_fields(form_data) if isinstance(form_data, aiohttp.FormData) else form_data
+        return await self._post_form("widget_item", fields)
 
     # ── Widget ──
 
-    async def create_widget(self, form_data: aiohttp.FormData) -> dict:
-        """POST /api/app/widget/ — multipart form."""
-        return await self._post_form("widget", form_data)
+    async def create_widget(self, form_data) -> dict:
+        """POST /api/app/widget/ — accepts FormData or dict of fields."""
+        fields = self._extract_fields(form_data) if isinstance(form_data, aiohttp.FormData) else form_data
+        return await self._post_form("widget", fields)
 
-    async def _post_form(self, endpoint_key: str, form_data: aiohttp.FormData, is_retry=False) -> dict:
-        """Post multipart form with auth. CSRF token in both header AND body."""
+    def _extract_fields(self, form_data: aiohttp.FormData) -> list:
+        """Extract fields from FormData into a list of tuples for rebuild on retry.
+        Returns [(name, value, kwargs)] where kwargs may have filename/content_type for files."""
+        fields = []
+        for field in form_data._fields:
+            type_options = field[0]
+            value = field[2]
+            name = type_options.get("name", "")
+            if not name:
+                continue
+            kwargs = {}
+            if "filename" in type_options:
+                kwargs["filename"] = type_options["filename"]
+            if "content_type" in type_options:
+                kwargs["content_type"] = type_options["content_type"]
+            fields.append((name, value, kwargs))
+        return fields
+
+    def _build_form(self, fields) -> aiohttp.FormData:
+        """Build fresh FormData from extracted fields."""
+        form = aiohttp.FormData()
+        form.add_field("csrfmiddlewaretoken", self.csrf_token or "")
+        if isinstance(fields, dict):
+            for k, v in fields.items():
+                if k == "csrfmiddlewaretoken":
+                    continue
+                form.add_field(k, v if v is not None else "")
+        elif isinstance(fields, list):
+            for name, value, kwargs in fields:
+                if name == "csrfmiddlewaretoken":
+                    continue
+                form.add_field(name, value if value is not None else "", **kwargs)
+        return form
+
+    async def _post_form(self, endpoint_key: str, fields, is_retry=False) -> dict:
+        """Post multipart form with auth. Accepts dict or FormData. Rebuilds on retry."""
+        if isinstance(fields, aiohttp.FormData):
+            fields = self._extract_fields(fields)
         await self._ensure_session()
         if not self.session_id:
             success = await self.login()
             if not success:
                 return {"error": "Samaan login failed."}
 
-        # Django needs csrfmiddlewaretoken in form body + X-CSRFToken header + Cookie
-        form_data.add_field("csrfmiddlewaretoken", self.csrf_token or "")
-
+        form_data = self._build_form(fields)
         url = f"{self.base_url}{self.endpoints[endpoint_key]}"
         headers = {
             "X-CSRFToken": self.csrf_token or "",
@@ -151,11 +187,10 @@ class SamaanClient:
         }
 
         try:
-            async with self._session.post(url, data=form_data, headers=headers, timeout=aiohttp.ClientTimeout(total=30)) as resp:
+            async with self._session.post(url, data=form_data, headers=headers, timeout=aiohttp.ClientTimeout(total=60)) as resp:
                 if resp.status == 403 and not is_retry:
                     await self.login()
-                    # Cannot retry — aiohttp.FormData is consumed after first POST. Caller should retry.
-                    return {"error": f"Session expired on {endpoint_key}. Re-login done, please retry the operation."}
+                    return await self._post_form(endpoint_key, fields, is_retry=True)
                 try:
                     return await resp.json()
                 except:

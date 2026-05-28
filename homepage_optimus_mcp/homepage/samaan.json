@@ -6,8 +6,8 @@
     },
     "credentials": {
         "PROD": {
-            "username": "Automation",
-            "password": "Qwerty@123"
+            "username": "satyam.gupta@apnamart.in",
+            "password": "Docherry@123"
         },
         "UAT": {
             "username": "vicky.das",
