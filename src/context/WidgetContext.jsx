@@ -225,6 +225,14 @@ export const WidgetProvider = ({ children }) => {
         showToast.success('Widget deleted');
     };
 
+    const clearEmulator = () => {
+        setWidgets([]);
+        setSelectedWidgetId(null);
+        setSelectedWidgetIds([]);
+        logActivity('emulator_cleared', { count: widgets.length });
+        showToast.success('Emulator cleared');
+    };
+
     const duplicateWidget = (id) => {
         if (pageStatus !== 'DRAFT' && pageStatus !== 'REJECTED') {
             showToast.warning("Cannot edit while in review or approved");
@@ -451,6 +459,7 @@ export const WidgetProvider = ({ children }) => {
             addWidget,
             updateWidget,
             deleteWidget,
+            clearEmulator,
             moveWidget,
             pageStatus,
             submitForReview,

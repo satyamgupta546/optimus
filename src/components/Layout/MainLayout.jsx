@@ -22,7 +22,7 @@ const MainLayout = () => {
     const {
         pageStatus, setPageStatus, submitForReview, approvePage, rejectPage, resetToDraft,
         canUndo, canRedo, undo, redo,
-        widgets, deleteWidget, submitSelection, setSubmitSelection, toggleSubmitSelection, showSubmitModal, setShowSubmitModal, openSubmitModal,
+        widgets, clearEmulator, submitSelection, setSubmitSelection, toggleSubmitSelection, showSubmitModal, setShowSubmitModal, openSubmitModal,
         headerWidgets,
     } = useWidgetContext();
     const { theme, toggleTheme, osType, toggleOS } = useAppSettings();
@@ -141,7 +141,7 @@ const MainLayout = () => {
                         onClick={() => {
                             if (widgets.length === 0) return;
                             if (confirm(`Remove all ${widgets.length} widgets from emulator?`)) {
-                                widgets.forEach(w => deleteWidget(w.id));
+                                clearEmulator();
                             }
                         }}
                         disabled={widgets.length === 0}
