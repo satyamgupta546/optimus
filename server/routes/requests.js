@@ -151,11 +151,8 @@ router.post('/', async (req, res, next) => {
     const created = await SubService.fetchRequestById(newRequestId, req.env);
     res.status(201).json(created);
   } catch (err) {
-    console.error('[requests POST /] Error:', err.message);
-    if (err.message.includes('BigQuery') || err.message.includes('database')) {
-      return res.status(502).json({ error: 'Database write failed', details: err.message });
-    }
-    next(err);
+    console.error('[requests POST /] Error:', err.message, err.stack);
+    return res.status(500).json({ error: 'Submit failed', details: err.message });
   }
 });
 
