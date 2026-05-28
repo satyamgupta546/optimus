@@ -339,10 +339,10 @@ function groupRowsIntoRequests(rows) {
           name: firstAction.by ? firstAction.by.split('@')[0] : '',
         },
         rejectionReason: row.rejection_reason || '',
-        headerWidgets: row.header_widgets || {},
+        headerWidgets: typeof row.header_widgets === 'string' ? (() => { try { return JSON.parse(row.header_widgets); } catch { return {}; } })() : (row.header_widgets || {}),
         createdAt: row.created_at || '',
         updatedAt: row.updated_at || '',
-        history: row.history || [],
+        history: typeof row.history === 'string' ? (() => { try { return JSON.parse(row.history); } catch { return []; } })() : (row.history || []),
         requestWidgets: [],
       });
     }
@@ -364,9 +364,9 @@ function groupRowsIntoRequests(rows) {
         title: row.title || '',
         titleHi: row.title_hi || '',
       },
-      hierarchy: row.hierarchy || {},
-      pnc: row.pnc || {},
-      config: row.config || {},
+      hierarchy: typeof row.hierarchy === 'string' ? (() => { try { return JSON.parse(row.hierarchy); } catch { return {}; } })() : (row.hierarchy || {}),
+      pnc: typeof row.pnc === 'string' ? (() => { try { return JSON.parse(row.pnc); } catch { return {}; } })() : (row.pnc || {}),
+      config: typeof row.config === 'string' ? (() => { try { return JSON.parse(row.config); } catch { return {}; } })() : (row.config || {}),
     });
   }
 
