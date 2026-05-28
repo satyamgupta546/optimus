@@ -22,7 +22,7 @@ const MainLayout = () => {
     const {
         pageStatus, setPageStatus, submitForReview, approvePage, rejectPage, resetToDraft,
         canUndo, canRedo, undo, redo,
-        widgets, submitSelection, setSubmitSelection, toggleSubmitSelection, showSubmitModal, setShowSubmitModal, openSubmitModal,
+        widgets, deleteWidget, submitSelection, setSubmitSelection, toggleSubmitSelection, showSubmitModal, setShowSubmitModal, openSubmitModal,
         headerWidgets,
     } = useWidgetContext();
     const { theme, toggleTheme, osType, toggleOS } = useAppSettings();
@@ -135,6 +135,22 @@ const MainLayout = () => {
                         <Redo2 size={16} />
                     </button>
 
+
+                    {/* Clear Emulator */}
+                    <button
+                        onClick={() => {
+                            if (widgets.length === 0) return;
+                            if (confirm(`Remove all ${widgets.length} widgets from emulator?`)) {
+                                widgets.forEach(w => deleteWidget(w.id));
+                            }
+                        }}
+                        disabled={widgets.length === 0}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition-colors text-xs font-medium disabled:opacity-30 disabled:cursor-not-allowed"
+                        title="Clear all widgets from emulator"
+                    >
+                        <X size={14} />
+                        <span>Clear Emulator</span>
+                    </button>
 
                     <div className="h-6 w-px bg-slate-200"></div>
 
