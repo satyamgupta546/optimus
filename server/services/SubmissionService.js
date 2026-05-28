@@ -267,7 +267,8 @@ export async function appendHistory(requestId, action, user, extra = {}) {
 
   for (const row of rows) {
     const history = [...(Array.isArray(row.history) ? row.history : JSON.parse(row.history || '[]')), entry];
-    await BQ.updateRows('submissions', { history: JSON.stringify(history) }, `id = ${row.id}`);
+    const rowWhere = row.id ? `id = ${row.id}` : `request_id = ${row.request_id} AND sort_order = ${row.sort_order ?? 0}`;
+    await BQ.updateRows('submissions', { history: JSON.stringify(history) }, rowWhere);
   }
 }
 
