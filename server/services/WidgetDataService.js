@@ -179,6 +179,9 @@ export async function createWidget(data) {
     widgetId = crypto.randomUUID();
   }
 
+  const configObj = typeof data.config === 'string' ? JSON.parse(data.config) : (data.config || {});
+  const productsObj = typeof data.products === 'string' ? JSON.parse(data.products) : (data.products || []);
+
   const row = {
     widget_id: widgetId,
     type: data.type || 'unknown',
@@ -188,9 +191,9 @@ export async function createWidget(data) {
     title_hi: data.titleHi || '',
     status: data.status || 'DRAFT',
     sort_order: data.sortOrder ?? 0,
-    pnc,
-    config: typeof data.config === 'string' ? JSON.parse(data.config) : (data.config || {}),
-    products: typeof data.products === 'string' ? JSON.parse(data.products) : (data.products || []),
+    pnc: JSON.stringify(pnc),
+    config: JSON.stringify(configObj),
+    products: JSON.stringify(productsObj),
     author: data.createdBy || '',
     is_deleted: false,
   };
