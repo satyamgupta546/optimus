@@ -63,13 +63,15 @@ export async function selectRows(table, { where, orderBy, limit } = {}) {
 }
 
 /**
- * INSERT a single row.
+ * INSERT a single row via DML (not streaming API).
+ * DML inserts are immediately available for UPDATE/DELETE — no streaming buffer delay.
  */
 export async function insertRow(table, row) {
   if (!bigquery) throw new Error('BigQuery not configured');
-  const dataset = bigquery.dataset(DATASET);
-  const tbl = dataset.table(table);
-  await tbl.insert([row]);
+  const keys = Object.keys(row);
+  const vals = keys.map(k => formatVal(row[k]));
+  const sql = `INSERT INTO ${T(table)} (${keys.join(', ')}) VALUES (${vals.join(', ')})`;
+  await query(sql);
   return row;
 }
 
