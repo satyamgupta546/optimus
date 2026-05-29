@@ -84,9 +84,9 @@ const MainLayout = () => {
     }, [resize, stopResizing]);
 
     return (
-        <div className={`flex flex-col h-screen bg-slate-50 ${isResizing ? 'cursor-col-resize select-none' : ''}`}>
+        <div className={`flex flex-col h-screen bg-slate-50 min-w-[1024px] ${isResizing ? 'cursor-col-resize select-none' : ''}`}>
             {/* Header */}
-            <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0 z-10 sticky top-0 overflow-x-auto overflow-y-hidden min-w-0">
+            <header className="h-12 bg-white border-b border-slate-200 flex items-center justify-between px-4 shrink-0 z-10 sticky top-0">
                 <div className="flex items-center gap-4">
                     <img
                         src="/assets/optimus-logo.svg"
@@ -104,7 +104,7 @@ const MainLayout = () => {
                     </span>
                 </div>
 
-                <div className="flex items-center gap-3 shrink-0 flex-nowrap">
+                <div className="flex items-center gap-2 shrink-0 flex-nowrap">
                     {/* OS Switcher */}
                     <button
                         onClick={toggleOS}
