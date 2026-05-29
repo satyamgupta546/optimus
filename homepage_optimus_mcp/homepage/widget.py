@@ -24,8 +24,18 @@ async def handle_widget(arguments: dict, configs: dict) -> dict:
         return await _duplicate(arguments, configs)
     elif action == "history":
         return await _history(arguments, configs)
+    elif action == "create_page":
+        return await _create_page(arguments, configs)
+    elif action == "create_item":
+        return await _create_item(arguments, configs)
+    elif action == "map_item":
+        return await _map_item(arguments, configs)
+    elif action == "map_widget_to_page":
+        return await _map_widget_to_page(arguments, configs)
+    elif action == "update_item":
+        return await _update_item(arguments, configs)
     else:
-        return {"error": f"widget.{action} is not a valid action. Options: create, edit, list, get, duplicate, history"}
+        return {"error": f"widget.{action} is not a valid action. Options: create, edit, list, get, history, create_page, create_item, map_item, map_widget_to_page, update_item"}
 
 
 _WIDGET_TYPE_MAP = {
@@ -635,3 +645,201 @@ def _generate_slug(title: str, widget_type: str) -> str:
         "secondary_masthead": "_sm_hp",
     }
     return f"{base}{type_suffix.get(widget_type, '')}"
+
+
+# ══════════════════════════════════════════════════════════════
+# GRANULAR ACTIONS — individual page, item, mapping operations
+# ══════════════════════════════════════════════════════════════
+
+async def _create_page(args: dict, configs: dict) -> dict:
+    """Create a category page layout."""
+    env = args.get("env", "UAT")
+    slug = args.get("slug")
+    heading = args.get("heading", "")
+    page_type = args.get("page_type", "category_page")
+
+    if not slug:
+        return {"error": "create_page requires 'slug' parameter."}
+
+    if env == "PROD" and not args.get("prod_ack"):
+        return {"status": "prod_confirmation_required", "message": f"PROD — create page '{slug}'. Call with prod_ack=true.", "environment": "PROD"}
+
+    from homepage.samaan_client import SamaanClient
+    samaan_cfg = configs.get("samaan", {})
+    samaan = SamaanClient(samaan_cfg, env)
+    try:
+        await samaan.login()
+        r = await samaan._request("POST", "page_layout", json_body={
+            "slug_name": slug,
+            "page_heading": heading,
+            "page_layout_type": "2",
+            "page_type": page_type,
+        })
+        return {"status": "created", "slug": slug, "page_type": page_type, "environment": env, "response": r}
+    except Exception as e:
+        return {"status": "failed", "error": str(e)}
+    finally:
+        await samaan.close()
+
+
+async def _create_item(args: dict, configs: dict) -> dict:
+    """Create a widget item (sub_category or carousel)."""
+    import aiohttp, base64, json as json_mod
+
+    env = args.get("env", "UAT")
+    slug = args.get("slug")
+    item_type = args.get("item_type", "sub_category")
+    text_en = args.get("text_en", "")
+    text_hi = args.get("text_hi", "")
+    products = args.get("products", "")
+    click_action = args.get("click_action", "null" if item_type == "sub_category" else "redirect-to-page")
+    slave_key = args.get("slave_key", "")
+    click_params = args.get("click_action_params", "{}")
+    start_time = args.get("start_time")
+    end_time = args.get("end_time")
+
+    if not slug:
+        return {"error": "create_item requires 'slug' parameter."}
+    if not start_time or not end_time:
+        return {"error": "create_item requires 'start_time' and 'end_time'."}
+
+    if env == "PROD" and not args.get("prod_ack"):
+        return {"status": "prod_confirmation_required", "message": f"PROD — create item '{slug}'. Call with prod_ack=true."}
+
+    BLANK_PNG = base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=")
+
+    codes_int = [int(c) for c in products.split(",") if c.strip().isdigit()] if products else []
+    filter_lst = json_mod.dumps([{"condition": "in_stk_item_codes", "value": codes_int}]) if codes_int else "[]"
+
+    from homepage.samaan_client import SamaanClient
+    samaan_cfg = configs.get("samaan", {})
+    samaan = SamaanClient(samaan_cfg, env)
+    try:
+        await samaan.login()
+        form = aiohttp.FormData()
+        form.add_field("widget_item_id", "undefined")
+        form.add_field("deactivated_flag", "no")
+        form.add_field("item_click_action", click_action)
+        form.add_field("slug_name", slug)
+        form.add_field("item_type", item_type)
+        form.add_field("text_en", text_en)
+        form.add_field("text_hi", text_hi)
+        form.add_field("media_en", BLANK_PNG, filename="blank.png", content_type="image/png")
+        form.add_field("product_list", products)
+        form.add_field("filters", "[]")
+        form.add_field("filter_lst", filter_lst)
+        form.add_field("property_lst", "[]")
+        form.add_field("pl_edit", "PL")
+        form.add_field("is_clickable", "yes")
+        form.add_field("update_product_list", "no")
+        form.add_field("start_time", start_time)
+        form.add_field("end_time", end_time)
+        form.add_field("slave_key", slave_key)
+        form.add_field("click_action_params", click_params)
+        r = await samaan.create_widget_item(form)
+        return {"status": "created" if "error" not in r else "failed", "slug": slug, "item_type": item_type, "environment": env, "response": r}
+    except Exception as e:
+        return {"status": "failed", "error": str(e)}
+    finally:
+        await samaan.close()
+
+
+async def _map_item(args: dict, configs: dict) -> dict:
+    """Map widget items to a widget (CSV mapping)."""
+    env = args.get("env", "UAT")
+    widget_slug = args.get("widget_slug")
+    items = args.get("items")  # [{"slug": "...", "level_tag": "global", "level_property": "global", "priority": 1}]
+
+    if not widget_slug or not items:
+        return {"error": "map_item requires 'widget_slug' and 'items' list. Each item: {slug, level_tag, level_property, priority}"}
+
+    if env == "PROD" and not args.get("prod_ack"):
+        return {"status": "prod_confirmation_required", "message": f"PROD — map {len(items)} items to '{widget_slug}'. Call with prod_ack=true."}
+
+    header = "widget_item_slug_name,level_tag,level_property,priority,cohort"
+    rows = [f"{it['slug']},{it.get('level_tag','global')},{it.get('level_property','global')},{it.get('priority',i+1)}," for i, it in enumerate(items)]
+    csv_str = header + "\n" + "\n".join(rows)
+
+    from homepage.samaan_client import SamaanClient
+    samaan_cfg = configs.get("samaan", {})
+    samaan = SamaanClient(samaan_cfg, env)
+    try:
+        await samaan.login()
+        r = await samaan.map_widget_items_with_slug(widget_slug, csv_str.encode())
+        return {"status": "mapped" if r.get("message") == "success" else "failed", "widget_slug": widget_slug, "items_count": len(items), "environment": env, "response": r}
+    except Exception as e:
+        return {"status": "failed", "error": str(e)}
+    finally:
+        await samaan.close()
+
+
+async def _map_widget_to_page(args: dict, configs: dict) -> dict:
+    """Map widget to page layout + page to global registry."""
+    env = args.get("env", "UAT")
+    page_slug = args.get("page_slug")
+    widget_slug = args.get("widget_slug")
+    page_type = args.get("page_type", "category_page")
+
+    if not page_slug or not widget_slug:
+        return {"error": "map_widget_to_page requires 'page_slug' and 'widget_slug'."}
+
+    if env == "PROD" and not args.get("prod_ack"):
+        return {"status": "prod_confirmation_required", "message": f"PROD — map '{widget_slug}' to '{page_slug}'. Call with prod_ack=true."}
+
+    from homepage.samaan_client import SamaanClient
+    samaan_cfg = configs.get("samaan", {})
+    samaan = SamaanClient(samaan_cfg, env)
+    try:
+        await samaan.login()
+        # Widget → Page
+        plp_csv = f"widget_slug_name,level_tag,level_property,priority,cohort\n{widget_slug},global,global,1,\n"
+        r1 = await samaan.map_layout_widget_with_slug(page_slug, plp_csv.encode())
+        # Page → Global
+        pg_csv = "level_tag,level_property\nglobal,global\n"
+        r2 = await samaan.map_page_layout_with_slug(page_slug, page_type, pg_csv.encode())
+        return {"status": "mapped", "page_slug": page_slug, "widget_slug": widget_slug, "environment": env, "widget_to_page": r1, "page_to_global": r2}
+    except Exception as e:
+        return {"status": "failed", "error": str(e)}
+    finally:
+        await samaan.close()
+
+
+async def _update_item(args: dict, configs: dict) -> dict:
+    """Update widget item — products, text, time, image."""
+    env = args.get("env", "UAT")
+    slug = args.get("slug") or args.get("slug_or_id")
+    fields = args.get("fields_to_update", {})
+
+    if not slug:
+        return {"error": "update_item requires 'slug' parameter."}
+    if not fields:
+        return {"error": "update_item requires 'fields_to_update'. Options: product_list, text_en, text_hi, start_time, end_time"}
+
+    if env == "PROD" and not args.get("prod_ack"):
+        return {"status": "prod_confirmation_required", "message": f"PROD — update item '{slug}'. Call with prod_ack=true."}
+
+    from homepage.samaan_client import SamaanClient
+    samaan_cfg = configs.get("samaan", {})
+    samaan = SamaanClient(samaan_cfg, env)
+    try:
+        await samaan.login()
+        # Get item ID from Samaan
+        item_data = await samaan.get_widget_items(slug)
+        items = item_data.get("items", [])
+        if not items:
+            # Try BQ
+            from homepage.bq_client import BQClient
+            bq = BQClient()
+            bq_rows = bq._query(f"SELECT id FROM `apna-mart-data.smpublic.smapp_widgetitem` WHERE slug_name = '{slug}' AND active = true LIMIT 1")
+            if not bq_rows:
+                return {"error": f"Widget item '{slug}' not found."}
+            item_id = str(bq_rows[0]["id"])
+        else:
+            item_id = str(items[0].get("widget_item_id", ""))
+
+        r = await samaan.update_widget_item(item_id, slug, fields)
+        return {"status": r.get("status", "failed"), "slug": slug, "environment": env, "response": r}
+    except Exception as e:
+        return {"status": "failed", "error": str(e)}
+    finally:
+        await samaan.close()

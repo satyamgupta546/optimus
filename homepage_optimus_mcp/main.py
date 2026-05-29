@@ -67,8 +67,8 @@ async def list_tools():
                 "properties": {
                     "action": {
                         "type": "string",
-                        "enum": ["create", "edit", "list", "get", "history"],
-                        "description": "Action to perform"
+                        "enum": ["create", "edit", "list", "get", "history", "create_page", "create_item", "map_item", "map_widget_to_page", "update_item"],
+                        "description": "Action: create/edit/list/get/history (widget), create_page (page layout), create_item (widget item), map_item (items→widget CSV), map_widget_to_page (widget→page+global), update_item (update widget item fields)"
                     },
                     "type": {
                         "type": "string",
@@ -104,7 +104,17 @@ async def list_tools():
                         "type": "object",
                         "description": "Fields to update (for edit action)"
                     },
-                    "slug_or_id": {"type": "string", "description": "Slug or ID (for get action)"},
+                    "slug_or_id": {"type": "string", "description": "Slug or ID (for get/update_item action)"},
+                    "heading": {"type": "string", "description": "Page heading (for create_page)"},
+                    "item_type": {"type": "string", "enum": ["sub_category", "carousel"], "description": "Widget item type (for create_item)"},
+                    "text_en": {"type": "string", "description": "English text for widget item"},
+                    "text_hi": {"type": "string", "description": "Hindi text for widget item"},
+                    "click_action": {"type": "string", "description": "Click action: null, redirect-to-page, deal-detail-redirect"},
+                    "slave_key": {"type": "string", "description": "Slave key (page slug for carousel redirect)"},
+                    "click_action_params": {"type": "string", "description": "Click params JSON"},
+                    "widget_slug": {"type": "string", "description": "Widget slug for mapping (map_item/map_widget_to_page)"},
+                    "page_slug": {"type": "string", "description": "Page slug for mapping (map_widget_to_page)"},
+                    "items": {"type": "array", "description": "Items list for map_item: [{slug, level_tag, level_property, priority}]"},
                     "status": {"type": "string", "description": "Filter by status (for list action)"},
                     "env": {"type": "string", "enum": ["PROD", "UAT"], "description": "Environment: PROD or UAT (default: UAT)"},
                     "confirm": {"type": "boolean", "description": "Set to true to execute after reviewing summary. First call without confirm shows summary, second call with confirm=true executes."},
