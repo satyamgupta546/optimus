@@ -264,16 +264,21 @@ class SamaanClient:
             await self.login()
 
         url = f"{self.base_url}{self.endpoints['bulk_upload']}"
-        headers = {"X-CSRFToken": self.csrf_token or "", "Referer": self.base_url}
+        headers = {
+            "X-CSRFToken": self.csrf_token or "",
+            "Cookie": f"csrftoken={self.csrf_token}; sessionid={self.session_id}",
+            "Referer": f"{self.base_url}/widget-item/",
+        }
 
         form = aiohttp.FormData()
+        form.add_field("csrfmiddlewaretoken", self.csrf_token or "")
         form.add_field("file", csv_blob, filename=filename, content_type="text/csv")
 
-        async with self._session.put(url, data=form, headers=headers, timeout=aiohttp.ClientTimeout(total=30)) as resp:
+        async with self._session.put(url, data=form, headers=headers, timeout=aiohttp.ClientTimeout(total=120)) as resp:
             try:
                 return await resp.json()
             except:
-                return {"status": resp.status, "raw": await resp.text()}
+                return {"status": resp.status, "raw": (await resp.text())[:500]}
 
     # ── Get Widget by slug ──
 
