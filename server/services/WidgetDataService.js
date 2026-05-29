@@ -168,7 +168,7 @@ export async function createWidget(data) {
   //    - Falls back to CONTAINS search for mastheads (timestamp suffixes)
   // 3. Fallback to UUID (widget not yet on backend)
   // Derive full slug (base + type suffix) for SMApp matching
-  const pnc = typeof data.pnc === 'string' ? JSON.parse(data.pnc) : (data.pnc || {});
+  const pnc = typeof data.pnc === 'string' ? safeParse(data.pnc, {}) : (data.pnc || {});
   const fullSlug = deriveSmappSlug(data.slug, data.type, pnc) || data.slug || '';
 
   // widget_id: lookup from SMApp using full slug
@@ -184,8 +184,10 @@ export async function createWidget(data) {
     widgetId = crypto.randomUUID();
   }
 
-  const configObj = typeof data.config === 'string' ? JSON.parse(data.config) : (data.config || {});
-  const productsObj = typeof data.products === 'string' ? JSON.parse(data.products) : (data.products || []);
+  const configObj = typeof data.config === 'string' ? safeParse(data.config, {}) : (data.config || {});
+  const productsObj = typeof data.products === 'string'
+    ? (data.products.startsWith('[') ? safeParse(data.products, []) : data.products.split(',').map(s => s.trim()).filter(Boolean))
+    : (data.products || []);
 
   const row = {
     widget_id: widgetId,

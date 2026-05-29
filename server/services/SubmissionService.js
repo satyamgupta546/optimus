@@ -237,7 +237,8 @@ export async function createSubmission(requestIdOverride, widgets, user, env, he
 
   console.log(`[Submission] Creating: ${rows.length} widget(s) for request ${requestId}`);
 
-  // Stringify JSONB fields for BQ
+  // Stringify JSONB fields for BQ + add timestamps
+  const nowTs = new Date().toISOString();
   for (const row of rows) {
     row.pnc = JSON.stringify(row.pnc);
     row.config = JSON.stringify(row.config);
@@ -245,6 +246,8 @@ export async function createSubmission(requestIdOverride, widgets, user, env, he
     row.header_widgets = JSON.stringify(row.header_widgets);
     row.item_titles_hi = JSON.stringify(row.item_titles_hi);
     row.history = JSON.stringify(row.history);
+    row.created_at = nowTs;
+    row.updated_at = nowTs;
   }
 
   for (const row of rows) {
