@@ -3,7 +3,7 @@ import { CheckCircle, XCircle, Clock, Eye, RefreshCw, FileText, ChevronDown, Che
 import { useWidgetContext } from '../../context/WidgetContext';
 import { useAuth } from '../../context/AuthContext';
 import { LocalApiService } from '../../services/LocalApiService';
-import { getCsrfToken } from '../../services/AuthService';
+import { getCsrfToken } from '../../Backend/ApiClient';
 import MapToPageModal from './MapToPageModal';
 import toast from 'react-hot-toast';
 
@@ -264,11 +264,12 @@ const RequestQueue = ({ onClose, onApprove, onReject }) => {
 
             await LocalApiService.approveRequest(req.id, selectedWidgetIds.length > 0 ? selectedWidgetIds : undefined);
 
-            toast.success('Approved! Switch to "All History" tab and click Deploy to push to backend.', { duration: 6000 });
+            toast.success('Approved! Auto-deploying...', { duration: 2000 });
             onApprove?.(req.id);
-            // Auto-switch to history tab so Deploy button is visible
-            setViewMode('HISTORY');
             fetchRequests();
+
+            // Auto-deploy after approve
+            await handleDeploy({ ...req, status: 'APPROVED' });
         } catch (error) {
             console.error('Approve error:', error);
             if (error.status === 423 || error.response?.status === 423) {
@@ -311,8 +312,7 @@ const RequestQueue = ({ onClose, onApprove, onReject }) => {
     const handleDeploy = async (req) => {
         const token = getCsrfToken();
         if (!token) {
-            toast.error('Session expired — redirecting to login...');
-            setTimeout(() => logout(), 1500);
+            toast.error('Samaan session not found. Please login to Samaan first, then retry.');
             return;
         }
 

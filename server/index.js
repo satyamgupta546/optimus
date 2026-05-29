@@ -54,7 +54,7 @@ app.all('/api/local/proxy/:env/{*path}', express.raw({ type: '*/*', limit: '10mb
     // Forward Set-Cookie headers first (handle separately to avoid duplicates)
     const setCookies = upstream.headers.getSetCookie ? upstream.headers.getSetCookie() : [];
     setCookies.forEach(c => {
-      const cleaned = c.replace(/;\s*Domain=[^;]*/gi, '').replace(/;\s*SameSite=[^;]*/gi, '; SameSite=Lax');
+      const cleaned = c.replace(/;\s*Domain=[^;]*/gi, '').replace(/;\s*Secure/gi, '').replace(/;\s*SameSite=[^;]*/gi, '; SameSite=Lax');
       res.append('Set-Cookie', cleaned);
     });
 
