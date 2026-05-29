@@ -349,7 +349,7 @@ const WidgetHistory = ({ onClose }) => {
                                                                             Preview
                                                                         </button>
                                                                         <button
-                                                                            onClick={() => handleLoadToCanvas(w, snap)}
+                                                                            onClick={() => handleLoadToCanvas(w, snap || { ...rw.config, pnc: rw.pnc, hierarchy: rw.hierarchy })}
                                                                             className="flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
                                                                         >
                                                                             <Download size={11} />
