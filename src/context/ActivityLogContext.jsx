@@ -44,12 +44,12 @@ export const ActivityLogProvider = ({ children }) => {
 
         // Persist significant lifecycle events to local backend
         const PERSIST_ACTIONS = ['page_submitted', 'page_approved', 'page_rejected'];
-        if (PERSIST_ACTIONS.includes(action)) {
-            // Fire-and-forget — non-blocking
+        if (PERSIST_ACTIONS.includes(action) && details.requestId) {
+            // Fire-and-forget — non-blocking (skip if no requestId)
             LocalApiService.appendActivity({
                 action,
                 details,
-                targetId: details.requestId || '',
+                targetId: details.requestId,
             }).catch(e => console.warn('[ActivityLogContext] appendActivity error:', e));
         }
 
