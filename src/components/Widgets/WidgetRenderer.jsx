@@ -14,12 +14,16 @@ const WidgetRenderer = ({ widget, isSelected, onClick, deleteWidget }) => {
     const legacyComponentMap = {
         'Single Product Row': SingleProductRow,
         'Single Product Row Optimize': SingleProductRow,
+        'product_rail': SingleProductRow,
         'Secondary Masthead Carousel': PrimaryMasthead,
         'Primary Masthead': PrimaryMasthead,
+        'masthead': PrimaryMasthead,
+        'primaryMasthead': PrimaryMasthead,
         // Both scroll (carousel) and stick (category grid) modes go through CollectionBanner
         'Banner With Product Listing': CollectionBanner,
         'Category Grid': CollectionBanner,
         'Collection Banner': CollectionBanner,
+        'collection_banner': CollectionBanner,
     };
 
     // Config-driven componentMap (resolved from config.rendering.component)
