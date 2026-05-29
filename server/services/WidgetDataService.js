@@ -134,7 +134,7 @@ export async function listWidgets(env, { status, type, slug, date } = {}) {
   ];
   if (status) conditions.push(`status = '${BQ.esc(status)}'`);
   if (type) conditions.push(`type = '${BQ.esc(type)}'`);
-  if (slug) conditions.push(`slug = '${BQ.esc(slug)}'`);
+  if (slug) conditions.push(`slug LIKE '%${BQ.esc(slug)}%'`);
   if (date) {
     conditions.push(`created_at >= '${BQ.esc(date)}T00:00:00'`);
     conditions.push(`created_at < '${BQ.esc(date)}T23:59:59'`);

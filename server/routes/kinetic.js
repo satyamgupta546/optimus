@@ -22,7 +22,7 @@ router.get('/history', async (req, res, next) => {
       return res.status(400).json({ error: 'startDate and endDate are required' });
     }
 
-    const requests = await SubmissionService.fetchRequests(req.env, { status });
+    const requests = await SubmissionService.fetchRequests(req.env, { status, date: startDate });
     const rows = [];
     for (const r of requests) {
       for (const rw of r.requestWidgets) {

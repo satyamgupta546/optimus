@@ -1,5 +1,5 @@
 {
-    "base_url": "https://optimus-taupe.vercel.app/api/local",
+    "base_url": "https://optimus-flame-eight.vercel.app/api/local",
     "auth": {
         "user": "satyam.gupta@apnamart.in",
         "default_env": "UAT"
