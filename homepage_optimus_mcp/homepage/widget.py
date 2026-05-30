@@ -34,8 +34,14 @@ async def handle_widget(arguments: dict, configs: dict) -> dict:
         return await _map_widget_to_page(arguments, configs)
     elif action == "update_item":
         return await _update_item(arguments, configs)
+    elif action == "create_widget_raw":
+        return await _create_widget_raw(arguments, configs)
+    elif action == "update_widget_time":
+        return await _update_widget_time(arguments, configs)
+    elif action == "update_item_image":
+        return await _update_item_image(arguments, configs)
     else:
-        return {"error": f"widget.{action} is not a valid action. Options: create, edit, list, get, history, create_page, create_item, map_item, map_widget_to_page, update_item"}
+        return {"error": f"widget.{action} is not a valid action. Options: create, edit, list, get, history, create_page, create_item, map_item, map_widget_to_page, update_item, create_widget_raw, update_widget_time, update_item_image"}
 
 
 _WIDGET_TYPE_MAP = {
@@ -843,3 +849,246 @@ async def _update_item(args: dict, configs: dict) -> dict:
         return {"status": "failed", "error": str(e)}
     finally:
         await samaan.close()
+
+
+async def _create_widget_raw(args: dict, configs: dict) -> dict:
+    """Create any widget type (PLP, masthead, carousel, etc.) with full control."""
+    import aiohttp, json as json_mod
+
+    env = args.get("env", "UAT")
+    slug = args.get("slug")
+    widget_type = args.get("widget_type", "product_listing")
+    heading = args.get("heading", "")
+    app_config = args.get("app_configurations", '{"show_sub_cat":true,"display_vertical":true}')
+    bg_multimedia = args.get("background_multimedia", "")
+    start_time = args.get("start_time")
+    end_time = args.get("end_time")
+
+    if not slug:
+        return {"error": "create_widget_raw requires 'slug'."}
+    if not start_time or not end_time:
+        return {"error": "create_widget_raw requires 'start_time' and 'end_time'."}
+
+    if env == "PROD" and not args.get("prod_ack"):
+        return {"status": "prod_confirmation_required", "message": f"PROD — create widget '{slug}'. Call with prod_ack=true."}
+
+    from homepage.samaan_client import SamaanClient
+    samaan_cfg = configs.get("samaan", {})
+    samaan = SamaanClient(samaan_cfg, env)
+    try:
+        await samaan.login()
+        form_fields = {
+            "slug_name": slug,
+            "widget_type": widget_type,
+            "description": "",
+            "heading": "",
+            "master_key": "",
+            "heading_en": heading,
+            "heading_hi": "",
+            "heading_bg": "",
+            "start_time": start_time,
+            "end_time": end_time,
+            "clear_bg_media": "",
+            "media_aspect_ratio": args.get("aspect_ratio", "1"),
+            "view_all_action_name": "",
+            "background_multimedia": bg_multimedia,
+            "filter_dict": "{}",
+            "app_configurations": app_config,
+            "deactivated_flag": "no",
+        }
+        # Omit background_multimedia if empty
+        if not bg_multimedia:
+            del form_fields["background_multimedia"]
+
+        r = await samaan.create_widget(form_fields)
+        return {"status": "created" if "error" not in r else "failed", "slug": slug, "widget_type": widget_type, "environment": env, "response": r}
+    except Exception as e:
+        return {"status": "failed", "error": str(e)}
+    finally:
+        await samaan.close()
+
+
+async def _update_widget_time(args: dict, configs: dict) -> dict:
+    """Update widget start_time/end_time using exact Samaan PUT format."""
+    import json as json_mod, io, uuid, urllib.request, http.cookiejar, urllib.parse
+
+    env = args.get("env", "UAT")
+    slug = args.get("slug") or args.get("slug_or_id")
+    start_time = args.get("start_time")
+    end_time = args.get("end_time")
+
+    if not slug:
+        return {"error": "update_widget_time requires 'slug'."}
+    if not start_time or not end_time:
+        return {"error": "update_widget_time requires 'start_time' and 'end_time'."}
+
+    if env == "PROD" and not args.get("prod_ack"):
+        return {"status": "prod_confirmation_required", "message": f"PROD — update widget time '{slug}'. Call with prod_ack=true."}
+
+    samaan_cfg = configs.get("samaan", {})
+    env_key = "PROD" if env == "PROD" else "UAT"
+    import os
+    base = samaan_cfg.get("environments", {}).get(env_key, "")
+    username = os.environ.get(f"SAMAAN_{env_key}_USER") or samaan_cfg.get("credentials", {}).get(env_key, {}).get("username", "")
+    password = os.environ.get(f"SAMAAN_{env_key}_PASS") or samaan_cfg.get("credentials", {}).get(env_key, {}).get("password", "")
+
+    jar = http.cookiejar.CookieJar()
+    opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
+    opener.open(f"{base}/login/", timeout=30)
+    csrf = None
+    for c in jar:
+        if c.name == 'csrftoken': csrf = c.value
+    opener.open(urllib.request.Request(f"{base}/login/",
+        data=urllib.parse.urlencode({'csrfmiddlewaretoken': csrf, 'username': username, 'password': password}).encode(),
+        headers={'Referer': f"{base}/login/"}), timeout=30)
+    csrf = session = None
+    for c in jar:
+        if c.name == 'csrftoken': csrf = c.value
+        if c.name == 'sessionid': session = c.value
+
+    # Get widget data
+    resp = opener.open(urllib.request.Request(f"{base}/api/app/get_widget/?slug_name={slug}",
+        headers={'Cookie': f'csrftoken={csrf}; sessionid={session}'}), timeout=15)
+    wdata = json_mod.loads(resp.read())
+    wid = wdata.get('id')
+    if not wid:
+        return {"error": f"Widget '{slug}' not found."}
+
+    heading = args.get("heading", wdata.get('heading_en', ''))
+    wtype = wdata.get('widget_type', 'product_listing')
+    app_cfg = wdata.get('app_configurations', {})
+    app_cfg_str = json_mod.dumps(app_cfg) if isinstance(app_cfg, dict) else str(app_cfg or '{}')
+
+    boundary = "----WebKitFormBoundary" + uuid.uuid4().hex[:16]
+    body = io.BytesIO()
+    fields = [
+        ("slug_name", slug), ("widget_type", wtype), ("description", "undefined"), ("heading", "undefined"),
+        ("master_key", ""), ("heading_en", heading), ("heading_hi", ""), ("heading_bg", ""),
+        ("start_time", start_time), ("end_time", end_time), ("clear_bg_media", ""),
+        ("media_aspect_ratio", "1"), ("view_all_action_name", "null"), ("background_multimedia", ""),
+        ("filter_dict", "{}"), ("app_configurations", app_cfg_str), ("configurations", "{}"), ("deactivated_flag", "no"),
+    ]
+    for k, v in fields:
+        body.write(f"--{boundary}\r\nContent-Disposition: form-data; name=\"{k}\"\r\n\r\n{v}\r\n".encode())
+    body.write(f"--{boundary}--\r\n".encode())
+
+    req = urllib.request.Request(f"{base}/api/app/widget/{wid}/", data=body.getvalue(), method='PUT')
+    req.add_header('Content-Type', f'multipart/form-data; boundary={boundary}')
+    req.add_header('x-csrftoken', csrf)
+    req.add_header('Cookie', f'csrftoken={csrf}; sessionid={session}')
+    req.add_header('Referer', f'{base}/widget/{slug}/')
+    req.add_header('Origin', base)
+
+    try:
+        resp = opener.open(req, timeout=30)
+        return {"status": "updated", "slug": slug, "id": wid, "start_time": start_time, "environment": env}
+    except urllib.error.HTTPError as e:
+        return {"status": "failed", "error": f"HTTP {e.code}: {e.read().decode()[:100]}"}
+
+
+async def _update_item_image(args: dict, configs: dict) -> dict:
+    """Update widget item image from GCS registry or URL."""
+    import json as json_mod, io, uuid, urllib.request, http.cookiejar, urllib.parse
+    from datetime import datetime
+
+    env = args.get("env", "UAT")
+    slug = args.get("slug") or args.get("slug_or_id")
+    image_source = args.get("image_source")  # slug_name from registry or URL
+
+    if not slug:
+        return {"error": "update_item_image requires 'slug'."}
+    if not image_source:
+        return {"error": "update_item_image requires 'image_source' — GCS registry slug or image URL."}
+
+    if env == "PROD" and not args.get("prod_ack"):
+        return {"status": "prod_confirmation_required", "message": f"PROD — update image '{slug}'. Call with prod_ack=true."}
+
+    # Get image bytes
+    if image_source.startswith('http'):
+        img_bytes = urllib.request.urlopen(image_source, timeout=15).read()
+    else:
+        # From GCS registry
+        gcs_url = f"https://storage.googleapis.com/optimus-widget-media/widget-item-images/{image_source}.webp"
+        try:
+            img_bytes = urllib.request.urlopen(gcs_url, timeout=15).read()
+        except:
+            return {"error": f"Image not found in GCS registry: {image_source}"}
+
+    # Compress if > 48KB
+    if len(img_bytes) > 48000:
+        from PIL import Image
+        import tempfile
+        img = Image.open(io.BytesIO(img_bytes))
+        tmp = tempfile.NamedTemporaryFile(suffix='.webp', delete=False)
+        img.save(tmp.name, 'WEBP', quality=60)
+        img_bytes = open(tmp.name, 'rb').read()
+
+    samaan_cfg = configs.get("samaan", {})
+    env_key = "PROD" if env == "PROD" else "UAT"
+    import os
+    base = samaan_cfg.get("environments", {}).get(env_key, "")
+    username = os.environ.get(f"SAMAAN_{env_key}_USER") or samaan_cfg.get("credentials", {}).get(env_key, {}).get("username", "")
+    password = os.environ.get(f"SAMAAN_{env_key}_PASS") or samaan_cfg.get("credentials", {}).get(env_key, {}).get("password", "")
+
+    jar = http.cookiejar.CookieJar()
+    opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
+    opener.open(f"{base}/login/", timeout=30)
+    csrf = None
+    for c in jar:
+        if c.name == 'csrftoken': csrf = c.value
+    opener.open(urllib.request.Request(f"{base}/login/",
+        data=urllib.parse.urlencode({'csrfmiddlewaretoken': csrf, 'username': username, 'password': password}).encode(),
+        headers={'Referer': f"{base}/login/"}), timeout=30)
+    csrf = session = None
+    for c in jar:
+        if c.name == 'csrftoken': csrf = c.value
+        if c.name == 'sessionid': session = c.value
+    cookie = f"csrftoken={csrf}; sessionid={session}"
+
+    NOW = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    # Get current item data
+    resp = opener.open(urllib.request.Request(f"{base}/api/app/get_widget_item/?widget_item_slug_name={slug}",
+        headers={'Cookie': cookie}), timeout=15)
+    item = json_mod.loads(resp.read())
+    wid = str(item['id'])
+    pl = item.get('product_list', [])
+    pl_str = ','.join(str(c) for c in pl) if isinstance(pl, list) else str(pl)
+    fl = item.get('filter_dict', [])
+    fl_str = json_mod.dumps(fl) if isinstance(fl, list) else str(fl or '[]')
+
+    boundary = "----WebKitFormBoundary" + uuid.uuid4().hex[:16]
+    body = io.BytesIO()
+
+    for k, v in [("widget_item_id", wid), ("deactivated_flag", "no"),
+                 ("item_click_action", str(item.get('item_click_action') or 'null')),
+                 ("slug_name", slug), ("slave_key", ""), ("item_type", item.get('item_type', 'sub_category')),
+                 ("media", ""), ("text_en", item.get('text_en', ''))]:
+        body.write(f"--{boundary}\r\nContent-Disposition: form-data; name=\"{k}\"\r\n\r\n{v}\r\n".encode())
+
+    body.write(f"--{boundary}\r\nContent-Disposition: form-data; name=\"media_en\"; filename=\"image.webp\"\r\nContent-Type: image/webp\r\n\r\n".encode())
+    body.write(img_bytes)
+    body.write(b"\r\n")
+
+    for k, v in [("text_hi", item.get('text_hi', '')), ("media_hi", ""), ("text_bg", ""), ("media_bg", ""),
+                 ("product_list", pl_str), ("filters", "[]"), ("filter_lst", fl_str), ("property_lst", "[]"),
+                 ("pl_edit", "PL"), ("is_clickable", "yes"), ("update_product_list", "no"),
+                 ("start_time", NOW), ("end_time", "2027-06-01 23:59:00"), ("background_multimedia", ""),
+                 ("image_multimedia", ""), ("secondary_image_multimedia", ""), ("progress_bar", ""),
+                 ("offer_id", ""), ("click_action_params", "{}"), ("ranking_type", "none"),
+                 ("ranking_pin_pl", "false"), ("ranking_geo_level", "")]:
+        body.write(f"--{boundary}\r\nContent-Disposition: form-data; name=\"{k}\"\r\n\r\n{v}\r\n".encode())
+    body.write(f"--{boundary}--\r\n".encode())
+
+    req = urllib.request.Request(f"{base}/api/app/update_widget_item/", data=body.getvalue(), method='POST')
+    req.add_header('Content-Type', f'multipart/form-data; boundary={boundary}')
+    req.add_header('x-csrftoken', csrf)
+    req.add_header('Cookie', cookie)
+    req.add_header('Referer', f'{base}/widget-item/{slug}/')
+    req.add_header('Origin', base)
+
+    try:
+        resp = opener.open(req, timeout=30)
+        return {"status": "updated", "slug": slug, "image_size_kb": round(len(img_bytes)/1024, 1), "environment": env}
+    except urllib.error.HTTPError as e:
+        return {"status": "failed", "error": f"HTTP {e.code}: {e.read().decode()[:100]}"}

@@ -67,8 +67,8 @@ async def list_tools():
                 "properties": {
                     "action": {
                         "type": "string",
-                        "enum": ["create", "edit", "list", "get", "history", "create_page", "create_item", "map_item", "map_widget_to_page", "update_item"],
-                        "description": "Action: create/edit/list/get/history (widget), create_page (page layout), create_item (widget item), map_item (items→widget CSV), map_widget_to_page (widget→page+global), update_item (update widget item fields)"
+                        "enum": ["create", "edit", "list", "get", "history", "create_page", "create_item", "map_item", "map_widget_to_page", "update_item", "create_widget_raw", "update_widget_time", "update_item_image"],
+                        "description": "Actions: create/edit/list/get/history (bundled widget), create_page/create_item/map_item/map_widget_to_page/update_item (granular), create_widget_raw (any widget type), update_widget_time (PLP/masthead time), update_item_image (image from GCS registry)"
                     },
                     "type": {
                         "type": "string",
@@ -115,6 +115,11 @@ async def list_tools():
                     "widget_slug": {"type": "string", "description": "Widget slug for mapping (map_item/map_widget_to_page)"},
                     "page_slug": {"type": "string", "description": "Page slug for mapping (map_widget_to_page)"},
                     "items": {"type": "array", "description": "Items list for map_item: [{slug, level_tag, level_property, priority}]"},
+                    "widget_type": {"type": "string", "description": "Widget type for create_widget_raw: product_listing, masthead_primary, masthead_secondary_carousal_hp"},
+                    "app_configurations": {"type": "string", "description": "App config JSON for create_widget_raw"},
+                    "background_multimedia": {"type": "string", "description": "Multimedia slug for masthead background"},
+                    "aspect_ratio": {"type": "string", "description": "Media aspect ratio (default 1)"},
+                    "image_source": {"type": "string", "description": "For update_item_image: GCS registry slug or image URL"},
                     "status": {"type": "string", "description": "Filter by status (for list action)"},
                     "env": {"type": "string", "enum": ["PROD", "UAT"], "description": "Environment: PROD or UAT (default: UAT)"},
                     "confirm": {"type": "boolean", "description": "Set to true to execute after reviewing summary. First call without confirm shows summary, second call with confirm=true executes."},
