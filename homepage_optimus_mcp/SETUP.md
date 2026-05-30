@@ -35,7 +35,7 @@ python main.py
 You'll see:
 ```
 SAM MCP Server starting on port 8080...
-SSE endpoint: http://localhost:8080/sse
+Streamable HTTP endpoint: http://localhost:8080/mcp
 ```
 
 ### Step 4: Add to Claude Desktop
@@ -48,7 +48,7 @@ Add this:
   "mcpServers": {
     "sam": {
       "command": "npx",
-      "args": ["mcp-remote", "http://localhost:8080/sse", "--allow-http"]
+      "args": ["mcp-remote", "http://localhost:8080/mcp", "--allow-http"]
     }
   }
 }
@@ -136,19 +136,18 @@ gcloud run deploy sam-mcp \
   --project apna-mart-data \
   --region asia-south1 \
   --allow-unauthenticated \
-  --set-env-vars "SAMAAN_UAT_USER=vicky.das,SAMAAN_UAT_PASS=qwerty@123,SAMAAN_PROD_USER=Automation,SAMAAN_PROD_PASS=Qwerty@123" \
+  --set-env-vars "SAMAAN_UAT_USER=vicky.das,SAMAAN_UAT_PASS=qwerty@123,SAMAAN_PROD_USER=satyam.gupta@apnamart.in,SAMAAN_PROD_PASS=Docherry@123" \
   --service-account backend-bq-service@apna-mart-data.iam.gserviceaccount.com \
   --memory 512Mi \
-  --timeout 300 \
-  --session-affinity
+  --timeout 300
 ```
 
-This gives you a URL like: `https://sam-mcp-xxxxx-el.a.run.app`
+**Current Cloud Run URL:** `sam-mcp-288854937236.asia-south1.run.app/mcp`
 
 ### Team Member Setup (30 seconds)
 
 1. Open Claude Desktop → Settings → Connectors → Add Custom
-2. Paste: `https://sam-mcp-xxxxx-el.a.run.app/sse`
+2. Paste: `https://sam-mcp-288854937236.asia-south1.run.app/mcp`
 3. Done. Start chatting.
 
 Or via config file:
@@ -157,7 +156,7 @@ Or via config file:
   "mcpServers": {
     "sam": {
       "command": "npx",
-      "args": ["mcp-remote", "https://sam-mcp-xxxxx-el.a.run.app/sse"]
+      "args": ["mcp-remote", "https://sam-mcp-288854937236.asia-south1.run.app/mcp"]
     }
   }
 }
@@ -169,9 +168,12 @@ Or via config file:
 |---------|-------|-----|
 | `--allow-unauthenticated` | Public access | Claude Desktop needs direct HTTP |
 | `--service-account` | backend-bq-service | Has BigQuery + GCS access |
-| `--session-affinity` | Enabled | SSE needs sticky sessions |
 | `--timeout 300` | 5 min | Deploy operations take time |
 | `--memory 512Mi` | 512MB | Enough for Python + BQ client |
+
+### Transport
+
+Uses **Streamable HTTP** transport (stateless) — no SSE, no connection drops. OAuth 2.1 ready.
 
 ---
 

@@ -289,8 +289,8 @@ SAM does not duplicate these scripts — reads from Optimus, uses config + autom
 ```
 1. GET  https://samaan.apnamart.in/login/ → csrftoken cookie
 2. POST https://samaan.apnamart.in/login/ → sessionid cookie
-   - username: Automation
-   - password: Qwerty@123
+   - username: satyam.gupta@apnamart.in
+   - password: Docherry@123
 3. Use csrftoken + sessionid for all API calls
 ```
 

@@ -19,7 +19,7 @@ flowchart TD
 
     MAKER --> Canvas[Canvas: Build Widgets]
     Canvas --> Submit[Click Submit → PENDING]
-    Submit --> DB[Prisma DB\nRequest + Widget + RequestWidget]
+    Submit --> DB[BigQuery\nRequest + Widget + RequestWidget]
     DB --> RequestQueue[RequestQueue UI\nChecker sees PENDING]
 
     CHECKER --> RequestQueue
@@ -153,7 +153,7 @@ const addWidget = (widget) => {
         headerWidgets: { ...only selected mastheads }  // e.g. if Primary unchecked → omitted
     }
 12. LocalApiService.createRequest() sends to Express backend (POST /api/local/requests)
-13. Prisma creates Widget records + Request record + RequestWidget snapshots in one transaction
+13. BigQuery creates Widget records + Request record + RequestWidget snapshots
 14. pageStatus changes to PENDING
 15. Toast: "N widget(s) submitted for review!"
 16. All editing is now locked
@@ -187,13 +187,13 @@ Submit button click karne pe **selection modal** khulta hai. Maker choose karta 
 
 ### Slug Handling
 
-Slug ko as-is pass kiya jaata hai — **no uniqueness check, no auto-increment**. Jo slug SlugBuilder se create hota hai, wahi directly Prisma DB mein store hota hai. Sirf required check hota hai (slug empty nahi hona chahiye).
+Slug ko as-is pass kiya jaata hai — **no uniqueness check, no auto-increment**. Jo slug SlugBuilder se create hota hai, wahi directly BigQuery mein store hota hai. Sirf required check hota hai (slug empty nahi hona chahiye).
 
 ### What Gets Submitted
 
 | Data | Source | Stored In |
 | :--- | :--- | :--- |
-| Request ID | `uuid()` (Prisma auto-generated) | `Request.id` |
+| Request ID | `uuid()` (auto-generated) | `Request.id` |
 | Submitter | `req.user.id` (from auth middleware) | `Request.submittedBy` → `User` |
 | Request Type | `"Homepage Update"` | `Request.type` |
 | Status | `"PENDING"` | `Request.status` |
@@ -258,7 +258,7 @@ This section documents the complete lifecycle when a user **fetches an existing 
 3. The submitted payload includes:
     - Newly created widgets (no _fetched flag)
     - Fetched+edited widgets (with _fetched: true, slug, _rawData)
-4. Complete snapshot sent to Express backend (Prisma DB)
+4. Complete snapshot sent to Express backend (BigQuery)
 5. Status changes to PENDING
 ```
 
@@ -296,7 +296,7 @@ flowchart TD
     subgraph Submit
         E3 --> S1["Click Submit"]
         S1 --> S2["submitForReview()\npackage all widgets"]
-        S2 --> S3["Prisma DB\n(Widget + Request + RequestWidget snapshots)"]
+        S2 --> S3["BigQuery\n(Widget + Request + RequestWidget snapshots)"]
         S3 --> S4["Status: PENDING\nEditing locked"]
     end
 
@@ -407,8 +407,8 @@ flowchart TD
 ```
 APPROVE ≠ DEPLOY. These are two separate steps:
 
-  Approve → Updates Prisma DB status only (PENDING → APPROVED).
-             NO backend API calls are made.
+  Approve → Updates BigQuery status (PENDING → APPROVED).
+             Automatically triggers deploy for CHECKER.
   Deploy  → Makes actual POST/PATCH calls to Django backend
              (creates widgets, mappings, etc.)
 ```
@@ -430,7 +430,7 @@ APPROVE ≠ DEPLOY. These are two separate steps:
 ```
 1. Checker views a PENDING request
 2. Clicks "Approve & Deploy" button
-3. Step 1: LocalApiService.approveRequest() → Prisma status → APPROVED
+3. Step 1: LocalApiService.approveRequest() → BigQuery status → APPROVED
 4. Step 2: BackendSyncService.deployRequest() → API calls to Django backend
 5. Both steps happen in sequence — if approve succeeds, deploy starts automatically
 6. CSRF token auto-read from session cookie (no manual prompt)
@@ -467,7 +467,7 @@ After a successful deploy, the Checker can map deployed widgets to a CMS page la
 
 ### Architecture
 
-All submission, approval, and activity data is stored in **ClickHouse** (via Kinetic managed tables). Prisma/SQLite is still used for Widget records (needed for WidgetVersion, Comments, canvas UI), but `Request`, `RequestWidget`, and `ActivityLog` are fully managed in ClickHouse.
+All submission, approval, and activity data is stored in **BigQuery** (`apna-mart-data.optimus`) as the primary data store, with **ClickHouse** (via Kinetic managed tables) as a secondary analytics store. `Request`, `RequestWidget`, and `ActivityLog` are written to both BigQuery and ClickHouse.
 
 ```
 Write path:  Express route → KineticSyncService (BLOCKING) → ClickHouse
@@ -511,7 +511,7 @@ Checker B clicks Approve (after A is done)
 // POST /api/local/requests (when req.user.role === 'SUPER_ADMIN')
 // After creating the submission in ClickHouse:
 // 1. Immediately updates request_status → APPROVED in ClickHouse
-// 2. Updates Widget.status → APPROVED in Prisma
+// 2. Updates Widget.status → APPROVED in BigQuery
 // 3. Logs activity with { autoApproved: true }
 // 4. Returns response with status: 'APPROVED' (frontend sets pageStatus accordingly)
 // No PENDING step — Super Admin's submissions skip checker review entirely.
@@ -527,7 +527,7 @@ Checker B clicks Approve (after A is done)
 // 4. Checks request status is PENDING
 // 5. Optionally approves only selected widgets (selectedWidgetIds)
 // 6. BLOCKING: Updates request_status → APPROVED in ClickHouse
-// 7. Updates Widget.status → APPROVED in Prisma (for WidgetVersion/Comments)
+// 7. Updates Widget.status → APPROVED in BigQuery
 // 8. BLOCKING: Logs activity to ClickHouse activity_log
 // 9. Releases lock in finally block
 ```
@@ -541,7 +541,7 @@ Checker B clicks Approve (after A is done)
 // 3. Reads request from ClickHouse
 // 4. Checks request status is PENDING
 // 5. BLOCKING: Updates request_status → REJECTED + stores rejection_reason in ClickHouse
-// 6. Updates Widget.status → REJECTED in Prisma
+// 6. Updates Widget.status → REJECTED in BigQuery
 // 7. BLOCKING: Logs activity to ClickHouse
 // 8. Releases lock in finally block
 ```
@@ -553,7 +553,7 @@ Checker B clicks Approve (after A is done)
 // 1. Reads request from ClickHouse
 // 2. Checks request status is APPROVED or REJECTED
 // 3. BLOCKING: Updates request_status → DRAFT + clears rejection_reason in ClickHouse
-// 4. Updates Widget.status → DRAFT in Prisma
+// 4. Updates Widget.status → DRAFT in BigQuery
 // 5. BLOCKING: Logs activity to ClickHouse
 ```
 
@@ -565,7 +565,7 @@ The Express backend uses **header-based auth** via `server/middleware/auth.js`:
 Every request:
   1. Read X-Optimus-User header (email)
   2. Read X-Optimus-Env header (UAT or PROD, default: PROD)
-  3. Upsert User in Prisma DB
+  3. Upsert User in BigQuery
   4. Check CheckerList table for CHECKER role WHERE env = current env
   5. Set req.user = { id, email, name, role }, req.env = env
 ```
@@ -590,14 +590,14 @@ Every request:
 
 ---
 
-## 7. Data Storage — ClickHouse (Kinetic) + Prisma (SQLite)
+## 7. Data Storage — BigQuery (primary) + ClickHouse/Kinetic (secondary)
 
-### Source of Truth: ClickHouse (via Kinetic)
+### Source of Truth: BigQuery (apna-mart-data.optimus)
 
-Request, RequestWidget, and ActivityLog data is stored in **ClickHouse** via Kinetic managed tables. This replaces the former Prisma/SQLite storage for these entities.
+Request, RequestWidget, and ActivityLog data is stored in **BigQuery** as the primary source of truth. ClickHouse via Kinetic is a secondary analytics mirror.
 
-**Service:** `server/services/KineticSyncService.js` (blocking strict methods)
-**Low-level client:** `server/services/KineticService.js` (strict + fire-and-forget variants)
+**Primary service:** `server/services/BigQueryService.js` (DML INSERT — no streaming buffer delay)
+**Analytics sync:** `server/services/KineticSyncService.js` (fire-and-forget to ClickHouse)
 **Setup:** `server/scripts/kinetic-setup.js` (idempotent table + query creation)
 
 ### ClickHouse Tables
@@ -640,30 +640,27 @@ Request, RequestWidget, and ActivityLog data is stored in **ClickHouse** via Kin
 | `details` | String | Extra context as JSON |
 | `env` | String | PROD or UAT |
 
-### Prisma DB (SQLite) — Still Used
-
-**Database:** `server/prisma/optimus.db`
+### BigQuery Tables (apna-mart-data.optimus)
 
 | Table | Purpose | Key Fields |
 | :--- | :--- | :--- |
-| **Widget** | Central widget entity (versions, comments, canvas UI) | `id`, `type`, `slug`, `env`, `title`, `status`, `pnc`, `config`, `products` |
-| **WidgetVersion** | Version history | `widgetId`, `version`, `snapshot` |
-| **User** | User identity + role | `email` (unique), `name`, `role` |
-| **CheckerList** | Users authorized as Checkers (per env) | `userId`, `env` |
-| **HeaderWidget** | Header widget slots | `id`, `config` |
-| **Comment** | Widget comments | `widgetId`, `text`, `userId` |
-| **Product** | Local product catalog | `itemCode`, etc. |
-| **Location** | State/city definitions | `key`, `env` |
+| **canvas_widgets** | Central widget entity (versions, canvas UI) | `id`, `type`, `slug`, `env`, `title`, `status`, `pnc` (STRING→JSON), `config` (STRING→JSON), `products` (STRING→JSON) |
+| **widget_versions** | Version history | `widget_id`, `version`, `snapshot` |
+| **user_roles** | User identity + role | `email` (unique per env), `name`, `role`, `env` |
+| **locations** | State/city definitions | `key`, `env`, `level_tag`, `level_property` |
+| **submissions** | Request + widget snapshots | `request_id`, `widget_id`, `request_status`, `snapshot` |
+
+> **JSON columns:** All STRING columns that hold JSON (pnc, config, products, snapshot, etc.) are parsed via `safeParse()` on read — never crash on malformed JSON.
 
 ### API Routes (Express Backend)
 
 | Method | Route | Data Source | Description |
 | :--- | :--- | :--- | :--- |
 | GET | `/api/local/requests` | ClickHouse | Fetch requests (with status/date filter) |
-| POST | `/api/local/requests` | ClickHouse + Prisma | Submit — writes to CH (source of truth) + creates Widget in Prisma |
-| POST | `/api/local/requests/:id/approve` | ClickHouse + Prisma | Approve — updates CH status + Prisma Widget.status |
-| POST | `/api/local/requests/:id/reject` | ClickHouse + Prisma | Reject — updates CH status + Prisma Widget.status |
-| POST | `/api/local/requests/:id/reopen` | ClickHouse + Prisma | Reopen — updates CH status + Prisma Widget.status |
+| POST | `/api/local/requests` | BigQuery + Kinetic | Submit — writes to BigQuery (primary) + Kinetic (secondary) |
+| POST | `/api/local/requests/:id/approve` | BigQuery + Kinetic | Approve — updates BigQuery status + Kinetic mirror |
+| POST | `/api/local/requests/:id/reject` | BigQuery + Kinetic | Reject — updates BigQuery status + Kinetic mirror |
+| POST | `/api/local/requests/:id/reopen` | BigQuery + Kinetic | Reopen — updates BigQuery status + Kinetic mirror |
 | GET | `/api/local/activity` | ClickHouse | Fetch activity log |
 | POST | `/api/local/activity` | ClickHouse | Create activity log entry |
 
@@ -721,7 +718,7 @@ flowchart TD
         M4 --> M5["Status: PENDING\nEditing locked"]
     end
 
-    subgraph Prisma DB
+    subgraph BigQuery
         M4 --> DB["Widget + Request +\nRequestWidget (snapshot)"]
         DB --> C1
     end
@@ -861,18 +858,19 @@ return {
 
 ### Overview
 
-States and cities for state-wise product mapping are now **persisted in Prisma DB** (Location model). Previously stored in localStorage — now shared across all users and browsers.
+States and cities for state-wise product mapping are now **persisted in BigQuery** (`apna-mart-data.optimus.locations` table). Previously stored in localStorage — now shared across all users and browsers.
 
 **Source:** `src/components/AdminPanel/StateManagerModal.jsx`
 
-### Prisma Model
+### BigQuery Schema
 
-```prisma
-model Location {
-  id, key, env, levelTag, levelProperty, slugSuffix, label, type,
-  isDefault, isEnabled, isCustom, createdAt, updatedAt
-  @@unique([key, env])
-}
+```
+Table: apna-mart-data.optimus.locations
+Fields: id (STRING), key (STRING), env (STRING), level_tag (STRING),
+        level_property (STRING), slug_suffix (STRING), label (STRING),
+        type (STRING), is_default (BOOL), is_enabled (BOOL),
+        is_custom (BOOL), created_at (TIMESTAMP), updated_at (TIMESTAMP)
+Unique: (key, env)
 ```
 
 ### API Routes
@@ -898,8 +896,8 @@ model Location {
 
 | File | Role |
 |------|------|
-| `server/prisma/schema.prisma` | Location model |
-| `server/prisma/seed.js` | Seeds 44 locations per env (4 defaults + 40 catalog) |
+| `server/services/BigQueryService.js` | BigQuery client + locations table |
+| `server/scripts/seed-locations.js` | Seeds 44 locations per env (4 defaults + 40 catalog) |
 | `server/routes/locations.js` | CRUD API |
 | `src/services/LocationService.js` | Async cache + fetcher |
 | `src/services/LocalApiService.js` | API client methods |

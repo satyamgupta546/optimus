@@ -62,7 +62,7 @@
   "mcpServers": {
     "sam": {
       "command": "npx",
-      "args": ["mcp-remote", "http://<server-ip>:8080/sse", "--allow-http"]
+      "args": ["mcp-remote", "https://sam-mcp-288854937236.asia-south1.run.app/mcp"]
     }
   }
 }
@@ -76,7 +76,7 @@
 
 | Env | URL | Username | Password | Notes |
 |-----|-----|----------|----------|-------|
-| PROD | samaan.apnamart.in | Automation | Qwerty@123 | Widget deploy to production |
+| PROD | samaan.apnamart.in | satyam.gupta@apnamart.in | Docherry@123 | Widget deploy to production |
 | UAT | smapi-cu.apnamart.in | vicky.das | qwerty@123 | Widget deploy to UAT (testing) |
 
 ---

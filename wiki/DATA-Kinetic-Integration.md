@@ -11,17 +11,17 @@
 
 ## Overview
 
-Optimus syncs widget submission data to **ClickHouse** via the **Kinetic** platform. This runs alongside the existing Prisma/SQLite database as a **gradual migration** — Prisma stays primary, Kinetic is the secondary analytics store.
+Optimus syncs widget submission data to **ClickHouse** via the **Kinetic** platform. This runs alongside the primary **BigQuery** (`apna-mart-data.optimus`) database — Kinetic/ClickHouse is the secondary analytics store used for WidgetHistory, analytics, and audit trail.
 
 Only **PROD** environment data is synced to Kinetic.
 
 ```
 ┌─────────────┐     /api/local/*      ┌──────────────────┐     fire-and-forget
 │  React App  │ ──────────────────────▶│  Express :3001   │ ─────────────────────▶ Kinetic (Cloud Run)
-│  (Vite)     │                        │  Prisma + SQLite │                        │
-│  :8888      │                        └──────────────────┘                        ▼
-│             │◀─── dual-source ───────────────────────────────────────── ClickHouse
-└─────────────┘     (Prisma + Kinetic)                                     │
+│  (Vite)     │                        │  BigQuery        │                        │
+│  :8888      │                        │  (apna-mart-data │                        ▼
+│             │◀─── dual-source ───────│   .optimus)      │─────────────── ClickHouse
+└─────────────┘  (BigQuery + Kinetic)  └──────────────────┘                │
                                                                            ▼
                                                               mirror.apnamart.in
                                                               (Homepage Widget Submissions)
@@ -576,16 +576,16 @@ File/Blob values are stripped from the snapshot (can't serialize to JSON).
 The history panel fetches from both sources in parallel:
 
 ```javascript
-const [prismaResult, kineticResult] = await Promise.allSettled([
-  LocalApiService.getRequestsByDate(d),          // Prisma
-  LocalApiService.getKineticHistory({ ... }),     // Kinetic
+const [bqResult, kineticResult] = await Promise.allSettled([
+  LocalApiService.getRequestsByDate(d),          // BigQuery (primary)
+  LocalApiService.getKineticHistory({ ... }),     // Kinetic (secondary)
 ]);
 ```
 
 **Merge strategy:**
-1. Prisma requests are tagged with `_source: 'prisma'`
+1. BigQuery requests are tagged with `_source: 'bigquery'`
 2. Kinetic rows are grouped by `request_id` into pseudo-request objects tagged `_source: 'kinetic'`
-3. If a `request_id` exists in both, Prisma wins (it has richer relational data)
+3. If a `request_id` exists in both, BigQuery wins (it has richer relational data)
 4. Kinetic-only requests show a small "Kinetic" badge in the UI
 
 ### RequestQueue.jsx — Deploy Sync
@@ -1002,13 +1002,13 @@ Your App (Primary DB) ──── primary write ────→ Postgres/SQLite
 
 ---
 
-## Future: Full Migration
+## Migration Status
 
-When ready to switch from Prisma to Kinetic for history:
+BigQuery (`apna-mart-data.optimus`) is now the primary data store. SQLite/Prisma has been replaced.
 
-1. **Stop writing to Prisma WidgetVersion table** — remove version snapshot logic from `server/routes/widgets.js`
-2. **Switch WidgetHistory.jsx** — remove Prisma fetch, use only Kinetic
-3. **Add BigQuery engine** — create a parallel saved query with `"engine": "bigquery"` for cross-database analytics
-4. **Archive SQLite** — keep as backup, stop writing
+- **History UI** fetches from both BigQuery and Kinetic via `Promise.allSettled`
+- **Widget History date filter** now works correctly (date filter is live)
+- Kinetic/ClickHouse remains as the secondary analytics store for PROD submissions
+- **Widget search** uses LIKE partial match — not exact slug match
 
-The current dual-source architecture makes this a safe, reversible migration.
+The dual-source architecture (BigQuery primary + Kinetic secondary) is production-stable.

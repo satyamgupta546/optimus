@@ -227,11 +227,11 @@ WidgetContext.submitForReview(selectedWidgetIds) called
     ↓
 ValidationService.validateAndCheckSlugs(selectedWidgets) — field-level validation
     ↓
-Slug passed as-is (no uniqueness check — same slug goes to Prisma)
+Slug passed as-is (no uniqueness check — same slug goes to BigQuery)
     ↓
 Only selected widgets packaged into JSON payload
     ↓
-LocalApiService.createRequest() → Express backend → Prisma DB (SQLite)
+LocalApiService.createRequest() → Express backend → BigQuery (apna-mart-data.optimus)
     ↓
 pageStatus → PENDING
     ↓
@@ -368,11 +368,13 @@ Checker **RequestQueue** mein jaata hai aur pending requests dekhta hai.
 | Action | Tab se | Kya hota hai |
 | :--- | :--- | :--- |
 | **Preview** | PENDING | Canvas mein widgets restore, emulator mein dikhta hai |
-| **Approve** | PENDING | Automation trigger, backend pe create |
+| **Approve** | PENDING | Status APPROVED, automatically triggers deploy for CHECKER |
 | **Reject** | PENDING | Status REJECTED, Maker re-edit kar sakta hai |
 | **Re-open** | APPROVED | Status DRAFT, editing phir se open |
 | **Deploy** | APPROVED | Push widgets to Django backend (auto-CSRF from session cookie) |
-| **Approve & Deploy** | PENDING | One-click: approve in Prisma + deploy to Django backend |
+| **Approve & Deploy** | PENDING | One-click: approve in BigQuery + deploy to Django backend |
+
+> **Auto-Deploy on Approve:** When CHECKER approves, deploy is automatically triggered — no separate Deploy step needed for CHECKER role.
 
 ---
 
@@ -558,7 +560,7 @@ flowchart TD
         FillForm --> Emulator["Preview in Emulator\nPhoneFrame real-time render"]
         Emulator --> Submit[Click Submit]
         Submit --> Package["submitForReview\nPackage all widgets into JSON"]
-        Package --> DB["Prisma DB (SQLite)\nStatus: PENDING\nEditing locked"]
+        Package --> DB["BigQuery (apna-mart-data.optimus)\nStatus: PENDING\nEditing locked"]
     end
 
     RoleCheck -->|CHECKER| Queue
@@ -650,7 +652,7 @@ DRAFT ────────────────────→ PENDING
 | **WidgetContext** | `src/context/WidgetContext.jsx` | State, submit, approve, reject logic |
 | **LocalApiService** | `src/services/LocalApiService.js` | Express backend CRUD — widgets, requests, users, catalog |
 | **Express Backend** | `server/routes/requests.js` | Approval routing + status updates |
-| **Prisma Schema** | `server/prisma/schema.prisma` | Database models (Widget, Request, RequestWidget, etc.). Widget has `env` field (UAT/PROD) with `@@unique([slug, env])`. |
+| **BigQuery Schema** | `server/services/BigQueryService.js` | Database tables in `apna-mart-data.optimus` (canvas_widgets, submissions, widget_versions, user_roles, locations). Widget has `env` field (UAT/PROD). |
 | **BackendSyncService** | `src/services/BackendSyncService.js` | Deploy to Django — `postForm`, `postMapping`, `uploadMultimedia`, per-widget deploy functions |
 | **AuthContext** | `src/context/AuthContext.jsx` | Role management (MAKER/CHECKER) |
 | **RequestQueue** | `src/components/Dashboard/RequestQueue.jsx` | Checker review UI |
@@ -781,7 +783,7 @@ HTTP 500/502/503/504  →  Wait 500ms  →  Retry
 
 **Files:** `src/services/ValidationService.js` → `validateAndCheckSlugs()`
 
-Slug ko as-is pass kiya jaata hai — **no uniqueness check, no auto-increment**. Jo slug SlugBuilder se create hota hai, wahi directly Prisma DB mein store hota hai.
+Slug ko as-is pass kiya jaata hai — **no uniqueness check, no auto-increment**. Jo slug SlugBuilder se create hota hai, wahi directly BigQuery mein store hota hai.
 
 **Validation:** Sirf required field check — slug empty nahi hona chahiye.
 
@@ -792,7 +794,7 @@ Same slug → widget.slug = "rice_mela_spr_sc_rohp_global"
     ↓
 Submit → same slug in request payload
     ↓
-Prisma DB stores: slug = "rice_mela_spr_sc_rohp_global"
+BigQuery stores: slug = "rice_mela_spr_sc_rohp_global"
 ```
 
 > **Note:** Fetched widgets (`_fetched: true`) already have their backend slug preserved via `ApiMapper.js`.
@@ -842,7 +844,7 @@ Jab `VITE_ENV=UAT` ho, header mein logo ke paas orange pulsing **🧪 UAT** badg
 
 ### 9.8 Widget Environment Separation (UAT/PROD Data Isolation)
 
-**Files:** `server/prisma/schema.prisma`, `server/routes/widgets.js`, `server/middleware/auth.js`
+**Files:** `server/services/BigQueryService.js`, `server/routes/widgets.js`, `server/middleware/auth.js`
 
 Widget model mein `env` field add kiya gaya hai (`UAT` | `PROD`, default `PROD`). Ab same slug dono environments mein allow hai — unique constraint `@@unique([slug, env])` hai.
 
@@ -911,7 +913,7 @@ Deploy ke baad Checker ko "Map to Page" button dikhta hai (purple gradient). Cli
 
 **Files:** `src/context/ActivityLogContext.jsx`, `src/components/ActivityLogPanel.jsx`, `src/services/LocalApiService.js` → `appendActivity()`, `getActivity()`
 
-Significant events (`page_submitted`, `page_approved`, `page_rejected`) automatically Prisma DB (ActivityLog table) mein persist hote hain. Minor widget edits sirf in-memory rehte hain.
+Significant events (`page_submitted`, `page_approved`, `page_rejected`) automatically BigQuery (`apna-mart-data.optimus` activity_log table) mein persist hote hain. Minor widget edits sirf in-memory rehte hain.
 
 ActivityLogPanel mein 🔄 button se past sessions ke persisted logs load kiye ja sakte hain.
 

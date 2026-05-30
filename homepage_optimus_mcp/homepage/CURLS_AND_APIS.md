@@ -12,7 +12,7 @@ curl 'https://samaan.apnamart.in/login/' \
   -X POST \
   -H 'Content-Type: application/x-www-form-urlencoded' \
   -H 'Referer: https://samaan.apnamart.in/login/' \
-  --data-raw 'csrfmiddlewaretoken={csrf}&username=Automation&password=Qwerty%40123'
+  --data-raw 'csrfmiddlewaretoken={csrf}&username=satyam.gupta%40apnamart.in&password=Docherry%40123'
 ```
 
 ### UAT
@@ -262,7 +262,7 @@ Fields: file=CSV (widget_item, item_code, priority)
 - **CSRF token:** Must be in 3 places: `X-CSRFToken` header + `csrfmiddlewaretoken` form body + `csrftoken` cookie
 - **Referer:** Required — use `{base_url}/widget/` or `{base_url}/widget-item/`
 - **Session expiry:** Auto re-login on 403
-- **PROD credentials:** Automation / Qwerty@123
+- **PROD credentials:** satyam.gupta@apnamart.in / Docherry@123
 - **UAT credentials:** vicky.das / qwerty@123 (lowercase q)
 
 ---
@@ -271,7 +271,7 @@ Fields: file=CSV (widget_item, item_code, priority)
 
 | Env | URL | Credentials |
 |-----|-----|-------------|
-| PROD | https://samaan.apnamart.in | Automation / Qwerty@123 |
+| PROD | https://samaan.apnamart.in | satyam.gupta@apnamart.in / Docherry@123 |
 | UAT | https://smapi-cu.apnamart.in | vicky.das / qwerty@123 |
 
 ---
@@ -279,7 +279,54 @@ Fields: file=CSV (widget_item, item_code, priority)
 ## Known Issues
 
 1. **aiohttp CSRF mismatch:** PUT/POST calls via aiohttp get 403. Use urllib for write operations.
-2. **Automation user mapping access:** `get_paginated_widget_widget_item_mappings` returns 0 items for Automation user on PROD. Need personal session.
+2. **PROD auth:** Personal credentials required for mapping API access — use `satyam.gupta@apnamart.in`.
 3. **UAT PATCH:** PATCH method returns 404 on UAT. Use PUT instead.
 4. **Empty background_multimedia:** Sending empty string causes "Background Multimedia Name is invalid" on masthead. Omit field entirely.
 5. **view_all_action_params:** Must use double quotes in JSON. Single quotes from Python dict → API rejects.
+
+---
+
+## SAM MCP — Granular Widget Actions (sam_widget tool)
+
+The `sam_widget` tool supports 10 actions. `action` discriminator controls behavior.
+
+### Basic actions
+| Action | Description |
+|--------|-------------|
+| `list` | List widgets (filter by type, status, env) |
+| `get` | Get single widget by slug |
+| `create` | Create new widget with full config |
+| `update` | Update widget fields |
+| `delete` | Delete widget |
+
+### Granular creation actions
+| Action | Description |
+|--------|-------------|
+| `create_page` | Create a page layout only |
+| `create_item` | Create a widget item only |
+| `map_item` | Map a widget item to a widget (Layer 1) |
+| `map_widget_to_page` | Map a widget to a page layout (Layer 2) |
+| `update_item` | Update a widget item's product list / fields |
+
+### Usage example (sam_widget)
+```json
+{
+  "action": "create_page",
+  "slug": "rice_spr_page_p",
+  "page_type": "product_listing_page",
+  "env": "PROD"
+}
+```
+
+```json
+{
+  "action": "map_widget_to_page",
+  "page_slug": "GL-HP-global",
+  "widget_slug": "rice_sale_spr_opt",
+  "level": "global",
+  "priority": 1,
+  "env": "PROD"
+}
+```
+
+> Widget search uses **LIKE partial match** — you don't need exact slugs. `slug=rice` finds `rice_sale_spr_opt`, `rice_mela_spr`, etc.

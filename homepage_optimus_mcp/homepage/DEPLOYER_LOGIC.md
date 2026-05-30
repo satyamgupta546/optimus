@@ -194,7 +194,7 @@ Phase 3: Final mapping
 ### Environments
 | Env | URL | Username |
 |-----|-----|----------|
-| PROD | samaan.apnamart.in | Automation / Qwerty@123 |
+| PROD | samaan.apnamart.in | satyam.gupta@apnamart.in / Docherry@123 |
 | UAT | smapi-cu.apnamart.in | vicky.das / qwerty@123 |
 
 ### Mapping Methods

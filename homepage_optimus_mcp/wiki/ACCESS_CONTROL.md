@@ -116,7 +116,7 @@ User adds to their `~/Library/Application Support/Claude/claude_desktop_config.j
     "mcpServers": {
         "sam": {
             "command": "npx",
-            "args": ["mcp-remote", "http://<server-ip>:8080/sse", "--allow-http"]
+            "args": ["mcp-remote", "https://sam-mcp-288854937236.asia-south1.run.app/mcp"]
         }
     }
 }

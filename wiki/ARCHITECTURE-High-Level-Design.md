@@ -1,6 +1,6 @@
 # Architecture Overview
 
-Optimus is a full-stack widget management platform with a React frontend and a local Express + Prisma + SQLite backend.
+Optimus is a full-stack widget management platform with a React frontend and a local Express + BigQuery backend.
 
 ## Technology Stack
 
@@ -8,11 +8,13 @@ Optimus is a full-stack widget management platform with a React frontend and a l
 | :--- | :--- | :--- |
 | **Frontend** | React 19, Vite 7, Tailwind CSS 3.4 | Main application framework |
 | **State** | React Context API | Global state management (Widgets, Auth, Settings) |
-| **Backend** | Express 5 + Prisma ORM | REST API server (localhost:3001) |
-| **Database** | SQLite (Prisma) | Widget storage, approval workflow, user management |
+| **Backend** | Express 5 | REST API server (localhost:3001) |
+| **Database** | BigQuery (`apna-mart-data.optimus`) | Widget storage, approval workflow, user management |
+| **Media** | GCS (`gs://optimus-widget-media`) | Widget image/media uploads |
 | **D&D** | `@dnd-kit/core` | Smooth drag-and-drop widget reordering |
 | **Catalog** | Google Sheet CSV | Product catalog (fetched & cached via `useCatalog` hook) |
 | **Proxy** | Vite Dev Proxy | Routes `/api/local/*` → Express :3001, `/api/app/*` → Django production |
+| **Deployment** | Vercel | `optimus-flame-eight.vercel.app` (single URL) |
 
 ## Directory Structure
 
@@ -39,17 +41,16 @@ optimus/
 │   │   ├── ValidationService.js # Pre-submit validation + slug checks
 │   │   └── *.js               # Other services (AuthService, CatalogService)
 │   └── data/                  # Static assets and mock data
-├── server/                    # Express + Prisma backend
+├── server/                    # Express backend
 │   ├── index.js               # Express app entry point (port 3001)
 │   ├── middleware/
 │   │   ├── auth.js            # Email → role resolution + User upsert
 │   │   ├── validate.js        # Server-side widget validation
 │   │   └── errorHandler.js    # Centralized error responses
-│   ├── prisma/
-│   │   ├── schema.prisma      # Database schema (9 models)
-│   │   ├── client.js          # Prisma client singleton
-│   │   ├── seed.js            # DB seeding script
-│   │   └── optimus.db         # SQLite database file
+│   ├── services/
+│   │   ├── BigQueryService.js # BigQuery client (apna-mart-data.optimus)
+│   │   ├── WidgetDataService.js
+│   │   └── SubmissionService.js
 │   ├── routes/
 │   │   ├── widgets.js         # Widget CRUD, duplicate, reorder, versions
 │   │   ├── requests.js        # Submit, approve, reject, reopen
@@ -71,12 +72,13 @@ Frontend (React)                    Backend (Express :3001)
 ┌──────────────┐   /api/local/*    ┌─────────────────────┐
 │  Components  │ ───────────────▶  │  auth.js middleware  │
 │  Contexts    │                   │  + route handlers    │
-│  Services    │ ◀───────────────  │  + Prisma ORM       │
+│  Services    │ ◀───────────────  │  + BigQueryService  │
 └──────────────┘   JSON response   └──────────┬──────────┘
                                               │
                                     ┌─────────▼─────────┐
-                                    │  SQLite (Prisma)   │
-                                    │  optimus.db        │
+                                    │  BigQuery          │
+                                    │  apna-mart-data    │
+                                    │  .optimus          │
                                     └───────────────────┘
 ```
 
