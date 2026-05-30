@@ -6,12 +6,13 @@ Supports:
   - dry_run: Preview the CSV that would be uploaded (no actual upload)
 
 CSV format for Samaan bulk upload:
-  widget_item_slug_name,item_code,priority
+  widget_item,item_code,priority
   slug_1,90513,1
   slug_1,90518,2
 """
 
 import json
+import os
 
 
 async def handle_bulk(arguments: dict, configs: dict) -> dict:
@@ -48,19 +49,19 @@ def _build_csv(items: list) -> tuple:
         for priority, code in enumerate(codes, 1):
             rows.append(f"{slug},{code},{priority}")
 
-    header = "widget_item_slug_name,item_code,priority"
+    # CORRECT column name: widget_item (NOT widget_item_slug_name)
+    header = "widget_item,item_code,priority"
     csv_str = header + "\n" + "\n".join(rows)
     return csv_str, len(rows), len(items)
 
 
 async def _upload(args: dict, configs: dict) -> dict:
-    """Bulk upload item codes to Samaan widget items."""
+    """Bulk upload item codes to Samaan widget items via urllib (CSRF-safe)."""
     env = args.get("env")
     if not env:
         return {"status": "missing_env", "message": "Which environment? PROD or UAT?", "options": ["PROD", "UAT"]}
 
     items = args.get("items")
-    # items = [{"slug": "widget_item_slug", "products": "code1,code2,..."}]
 
     if not items or not isinstance(items, list):
         return {
@@ -69,7 +70,6 @@ async def _upload(args: dict, configs: dict) -> dict:
             "example": {
                 "items": [
                     {"slug": "bau_plp_firstfold_sale_grocery_cl_wi_all_both", "products": "90513,90518,368"},
-                    {"slug": "bau_plp_firstfold_sale_snacks_cl_wi_all_both", "products": "1249,4686"}
                 ]
             }
         }
@@ -79,7 +79,6 @@ async def _upload(args: dict, configs: dict) -> dict:
     csv_str, total_rows, item_count = _build_csv(items)
 
     if not confirm:
-        # Preview
         preview_lines = csv_str.split("\n")[:20]
         return {
             "status": "ready",
@@ -91,7 +90,6 @@ async def _upload(args: dict, configs: dict) -> dict:
             "next_step": "Confirm? Call again with confirm=true",
         }
 
-    # PROD safety gate
     if env == "PROD" and not args.get("prod_ack"):
         return {
             "status": "prod_confirmation_required",
@@ -99,19 +97,47 @@ async def _upload(args: dict, configs: dict) -> dict:
             "environment": "PROD",
         }
 
-    # Execute upload
-    from homepage.samaan_client import SamaanClient
+    # Upload via urllib (not aiohttp — CSRF works with urllib)
+    import urllib.request, urllib.parse, http.cookiejar, io, uuid
 
     samaan_cfg = configs.get("samaan", {})
-    samaan = SamaanClient(samaan_cfg, env)
+    env_key = "PROD" if env == "PROD" else "UAT"
+    base = samaan_cfg.get("environments", {}).get(env_key, "")
+    username = os.environ.get(f"SAMAAN_{env_key}_USER") or samaan_cfg.get("credentials", {}).get(env_key, {}).get("username", "")
+    password = os.environ.get(f"SAMAAN_{env_key}_PASS") or samaan_cfg.get("credentials", {}).get(env_key, {}).get("password", "")
 
     try:
-        login_ok = await samaan.login()
-        if not login_ok:
-            return {"status": "failed", "error": f"Samaan login failed on {env}."}
+        jar = http.cookiejar.CookieJar()
+        opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
+        opener.open(f"{base}/login/", timeout=30)
+        csrf = None
+        for c in jar:
+            if c.name == 'csrftoken': csrf = c.value
+        opener.open(urllib.request.Request(f"{base}/login/",
+            data=urllib.parse.urlencode({'csrfmiddlewaretoken': csrf, 'username': username, 'password': password}).encode(),
+            headers={'Referer': f"{base}/login/"}), timeout=30)
+        csrf = session = None
+        for c in jar:
+            if c.name == 'csrftoken': csrf = c.value
+            if c.name == 'sessionid': session = c.value
 
-        csv_bytes = csv_str.encode("utf-8")
-        result = await samaan.bulk_upload(csv_bytes, "bulk_upload.csv")
+        # Build multipart PUT
+        boundary = uuid.uuid4().hex
+        body = io.BytesIO()
+        body.write(f"--{boundary}\r\nContent-Disposition: form-data; name=\"csrfmiddlewaretoken\"\r\n\r\n{csrf}\r\n".encode())
+        body.write(f"--{boundary}\r\nContent-Disposition: form-data; name=\"file\"; filename=\"bulk.csv\"\r\nContent-Type: text/csv\r\n\r\n".encode())
+        body.write(csv_str.encode())
+        body.write(f"\r\n--{boundary}--\r\n".encode())
+
+        url = f"{base}/api/app/bulk_upload_products_for_wi/"
+        req = urllib.request.Request(url, data=body.getvalue(), method='PUT')
+        req.add_header('Content-Type', f'multipart/form-data; boundary={boundary}')
+        req.add_header('X-CSRFToken', csrf)
+        req.add_header('Cookie', f'csrftoken={csrf}; sessionid={session}')
+        req.add_header('Referer', f'{base}/widget-item/')
+
+        resp = opener.open(req, timeout=120)
+        result = json.loads(resp.read().decode())
 
         return {
             "status": "uploaded",
@@ -121,10 +147,10 @@ async def _upload(args: dict, configs: dict) -> dict:
             "widget_items": item_count,
             "samaan_response": result,
         }
+    except urllib.error.HTTPError as e:
+        return {"status": "failed", "error": f"HTTP {e.code}: {e.read().decode()[:200]}"}
     except Exception as e:
         return {"status": "failed", "error": str(e)}
-    finally:
-        await samaan.close()
 
 
 async def _dry_run(args: dict, configs: dict) -> dict:
