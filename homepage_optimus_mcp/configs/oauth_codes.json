@@ -1,0 +1,32 @@
+{
+  "kmo4IEXCpnKRWUdqsJiPYqlLXJdPKrFU9NVtLW9y2N0": {
+    "client_id": "jmgBD75JOtldBnI3WRzFCQ",
+    "redirect_uri": "http://localhost:3000/callback",
+    "code_challenge": "abc",
+    "code_challenge_method": "S256",
+    "email": "satyam.gupta@apnamart.in",
+    "name": "Satyam Gupta",
+    "role": "super_admin",
+    "projects": [
+      "*"
+    ],
+    "created_at": 1779908595.582301,
+    "expires_at": 1779908895.582301,
+    "used": false
+  },
+  "FR_v-67oo7EqNXUb7Rlg03ynrwwwkghjLI8OhdQzFyo": {
+    "client_id": "rEM2Vg909NSDHG_N_wwHWA",
+    "redirect_uri": "http://localhost:3000/cb",
+    "code_challenge": "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
+    "code_challenge_method": "S256",
+    "email": "satyam.gupta@apnamart.in",
+    "name": "Satyam Gupta",
+    "role": "super_admin",
+    "projects": [
+      "*"
+    ],
+    "created_at": 1779908757.952964,
+    "expires_at": 1779909057.952964,
+    "used": true
+  }
+}

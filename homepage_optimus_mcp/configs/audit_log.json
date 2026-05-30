@@ -2737,5 +2737,486 @@
     "error": "",
     "timestamp": 1779778338.1216571,
     "timestamp_iso": "2026-05-26T06:52:18Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.create",
+    "slug": "mcp_bug_test",
+    "params": {
+      "type": "spr",
+      "env": "UAT"
+    },
+    "response": {
+      "steps": [
+        {
+          "step": 1,
+          "message": "Created 1 sub-cat widget items",
+          "status": "ok"
+        },
+        {
+          "step": 2,
+          "message": "Created PLP widget: mcp_bug_test_plp_w",
+          "status": "ok"
+        },
+        {
+          "step": 3,
+          "message": "Created page layout: mcp_bug_test_page_p",
+          "status": "ok"
+        },
+        {
+          "step": 4,
+          "message": "Mapped 1 sub-cats → PLP widget",
+          "status": "ok"
+        },
+        {
+          "step": 5,
+          "message": "Mapped PLP → Page layout",
+          "status": "ok"
+        },
+        {
+          "step": 6,
+          "message": "Mapped Page → Global registry",
+          "status": "ok"
+        },
+        {
+          "step": 7,
+          "message": "Created 1 row widget items (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 8,
+          "message": "Created single_product_row_v2 widget: mcp_bug_test_spr_opt",
+          "status": "ok"
+        },
+        {
+          "step": 9,
+          "message": "Mapped Row items → SPR widget (state-wise)",
+          "status": "ok"
+        }
+      ],
+      "slug": "mcp_bug_test",
+      "status": "deployed",
+      "spr_slug": "mcp_bug_test_spr_opt",
+      "plp_slug": "mcp_bug_test_plp_w",
+      "page_slug": "mcp_bug_test_page_p",
+      "message": "Widget deployed! SPR slug: mcp_bug_test_spr_opt"
+    },
+    "status": "success",
+    "error": "",
+    "timestamp": 1779872718.0781581,
+    "timestamp_iso": "2026-05-27T09:05:18Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "slug.created",
+    "slug": "mcp_bug_test",
+    "params": {
+      "type": "spr",
+      "states": [
+        "global"
+      ]
+    },
+    "response": {},
+    "status": "logged",
+    "error": "",
+    "timestamp": 1779872718.080647,
+    "timestamp_iso": "2026-05-27T09:05:18Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.create",
+    "slug": "mcp_bq_save_test",
+    "params": {
+      "type": "spr",
+      "env": "UAT"
+    },
+    "response": {
+      "steps": [
+        {
+          "step": 1,
+          "message": "Created 1 sub-cat widget items",
+          "status": "ok"
+        },
+        {
+          "step": 2,
+          "message": "Created PLP widget: mcp_bq_save_test_plp_w",
+          "status": "ok"
+        },
+        {
+          "step": 3,
+          "message": "Created page layout: mcp_bq_save_test_page_p",
+          "status": "ok"
+        },
+        {
+          "step": 4,
+          "message": "Mapped 1 sub-cats → PLP widget",
+          "status": "ok"
+        },
+        {
+          "step": 5,
+          "message": "Mapped PLP → Page layout",
+          "status": "ok"
+        },
+        {
+          "step": 6,
+          "message": "Mapped Page → Global registry",
+          "status": "ok"
+        },
+        {
+          "step": 7,
+          "message": "Created 1 row widget items (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 8,
+          "message": "Created single_product_row_v2 widget: mcp_bq_save_test_spr_opt",
+          "status": "ok"
+        },
+        {
+          "step": 9,
+          "message": "Mapped Row items → SPR widget (state-wise)",
+          "status": "ok"
+        }
+      ],
+      "slug": "mcp_bq_save_test",
+      "status": "deployed",
+      "spr_slug": "mcp_bq_save_test_spr_opt",
+      "plp_slug": "mcp_bq_save_test_plp_w",
+      "page_slug": "mcp_bq_save_test_page_p",
+      "message": "Widget deployed! SPR slug: mcp_bq_save_test_spr_opt"
+    },
+    "status": "success",
+    "error": "",
+    "timestamp": 1779873024.621119,
+    "timestamp_iso": "2026-05-27T09:10:24Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "slug.created",
+    "slug": "mcp_bq_save_test",
+    "params": {
+      "type": "spr",
+      "states": [
+        "global"
+      ]
+    },
+    "response": {},
+    "status": "logged",
+    "error": "",
+    "timestamp": 1779873024.622887,
+    "timestamp_iso": "2026-05-27T09:10:24Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.edit",
+    "slug": "mcp_bq_save_test_spr_opt",
+    "params": {
+      "heading_en": "MCP BQ Save Test — EDITED"
+    },
+    "response": {
+      "status": "updated",
+      "slug": "mcp_bq_save_test_spr_opt",
+      "id": 1488
+    },
+    "status": "success",
+    "error": "",
+    "timestamp": 1779873047.750518,
+    "timestamp_iso": "2026-05-27T09:10:47Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.create",
+    "slug": "eid_mubarak_hd",
+    "params": {
+      "type": "spr",
+      "env": "PROD"
+    },
+    "response": {
+      "steps": [
+        {
+          "step": 1,
+          "message": "Sub-cat eid_mubarak_hd_sc_wi_global",
+          "status": "failed",
+          "error": "{'error': 'Session expired on widget_item. Re-login done, please retry the operation.'}"
+        }
+      ],
+      "slug": "eid_mubarak_hd",
+      "status": "failed",
+      "error": "Step 1/9 failed: Sub-cat eid_mubarak_hd_sc_wi_global — {'error': 'Session expired on widget_item. Re-login done, please retry the operation.'}"
+    },
+    "status": "failed",
+    "error": "Step 1/9 failed: Sub-cat eid_mubarak_hd_sc_wi_global — {'error': 'Session expired on widget_item. Re-login done, please retry the operation.'}",
+    "timestamp": 1779917484.865501,
+    "timestamp_iso": "2026-05-27T21:31:24Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.create",
+    "slug": "eid_mubarak_hd",
+    "params": {
+      "type": "spr",
+      "env": "PROD"
+    },
+    "response": {
+      "steps": [
+        {
+          "step": 1,
+          "message": "Sub-cat eid_mubarak_hd_sc_wi_global",
+          "status": "failed",
+          "error": "{'error': 'Session expired on widget_item. Re-login done, please retry the operation.'}"
+        }
+      ],
+      "slug": "eid_mubarak_hd",
+      "status": "failed",
+      "error": "Step 1/9 failed: Sub-cat eid_mubarak_hd_sc_wi_global — {'error': 'Session expired on widget_item. Re-login done, please retry the operation.'}"
+    },
+    "status": "failed",
+    "error": "Step 1/9 failed: Sub-cat eid_mubarak_hd_sc_wi_global — {'error': 'Session expired on widget_item. Re-login done, please retry the operation.'}",
+    "timestamp": 1779917506.3359191,
+    "timestamp_iso": "2026-05-27T21:31:46Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.create",
+    "slug": "eid_mubarak_hd",
+    "params": {
+      "type": "spr",
+      "env": "PROD"
+    },
+    "response": {
+      "steps": [
+        {
+          "step": 1,
+          "message": "Created 1 sub-cat widget items",
+          "status": "ok"
+        },
+        {
+          "step": 2,
+          "message": "Created PLP widget: eid_mubarak_hd_plp_w",
+          "status": "ok"
+        },
+        {
+          "step": 3,
+          "message": "Created page layout: eid_mubarak_hd_page_p",
+          "status": "ok"
+        }
+      ],
+      "slug": "eid_mubarak_hd",
+      "status": "failed",
+      "error": "'FormData' object has no attribute 'items'"
+    },
+    "status": "failed",
+    "error": "'FormData' object has no attribute 'items'",
+    "timestamp": 1779917729.808987,
+    "timestamp_iso": "2026-05-27T21:35:29Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.create",
+    "slug": "eid_mubarak_hd_v2",
+    "params": {
+      "type": "spr",
+      "env": "PROD"
+    },
+    "response": {
+      "steps": [
+        {
+          "step": 1,
+          "message": "Created 1 sub-cat widget items",
+          "status": "ok"
+        },
+        {
+          "step": 2,
+          "message": "Created PLP widget: eid_mubarak_hd_v2_plp_w",
+          "status": "ok"
+        },
+        {
+          "step": 3,
+          "message": "Created page layout: eid_mubarak_hd_v2_page_p",
+          "status": "ok"
+        },
+        {
+          "step": 4,
+          "message": "Map sub-cats → PLP",
+          "status": "failed",
+          "error": "{'error': 'Please provide a valid CSV'}"
+        }
+      ],
+      "slug": "eid_mubarak_hd_v2",
+      "status": "failed",
+      "error": "Step 4/9 failed: Map sub-cats → PLP — {'error': 'Please provide a valid CSV'}"
+    },
+    "status": "failed",
+    "error": "Step 4/9 failed: Map sub-cats → PLP — {'error': 'Please provide a valid CSV'}",
+    "timestamp": 1779917787.004411,
+    "timestamp_iso": "2026-05-27T21:36:27Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.create",
+    "slug": "eid_mubarak_hd_top50",
+    "params": {
+      "type": "spr",
+      "env": "PROD"
+    },
+    "response": {
+      "steps": [
+        {
+          "step": 1,
+          "message": "Created 1 sub-cat widget items",
+          "status": "ok"
+        },
+        {
+          "step": 2,
+          "message": "Created PLP widget: eid_mubarak_hd_top50_plp_w",
+          "status": "ok"
+        },
+        {
+          "step": 3,
+          "message": "Created page layout: eid_mubarak_hd_top50_page_p",
+          "status": "ok"
+        },
+        {
+          "step": 4,
+          "message": "Mapped 1 sub-cats → PLP widget",
+          "status": "ok"
+        },
+        {
+          "step": 5,
+          "message": "Mapped PLP → Page layout",
+          "status": "ok"
+        },
+        {
+          "step": 6,
+          "message": "Mapped Page → Global registry",
+          "status": "ok"
+        },
+        {
+          "step": 7,
+          "message": "Created 1 row widget items (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 8,
+          "message": "Created single_product_row_v2 widget: eid_mubarak_hd_top50_spr_opt",
+          "status": "ok"
+        },
+        {
+          "step": 9,
+          "message": "Mapped Row items → SPR widget (state-wise)",
+          "status": "ok"
+        }
+      ],
+      "slug": "eid_mubarak_hd_top50",
+      "status": "deployed",
+      "spr_slug": "eid_mubarak_hd_top50_spr_opt",
+      "plp_slug": "eid_mubarak_hd_top50_plp_w",
+      "page_slug": "eid_mubarak_hd_top50_page_p",
+      "message": "Widget deployed! SPR slug: eid_mubarak_hd_top50_spr_opt"
+    },
+    "status": "success",
+    "error": "",
+    "timestamp": 1779917864.959368,
+    "timestamp_iso": "2026-05-27T21:37:44Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "slug.created",
+    "slug": "eid_mubarak_hd_top50",
+    "params": {
+      "type": "spr",
+      "states": [
+        "global"
+      ]
+    },
+    "response": {},
+    "status": "logged",
+    "error": "",
+    "timestamp": 1779917866.3479161,
+    "timestamp_iso": "2026-05-27T21:37:46Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "widget.create",
+    "slug": "bau_cp_featured_cat_Ice_Creams_spr_w_all_both_v2",
+    "params": {
+      "type": "spr",
+      "env": "PROD"
+    },
+    "response": {
+      "steps": [
+        {
+          "step": 1,
+          "message": "Created 1 sub-cat widget items",
+          "status": "ok"
+        },
+        {
+          "step": 2,
+          "message": "Created PLP widget: bau_cp_featured_cat_Ice_Creams_spr_w_all_both_v2_plp_w",
+          "status": "ok"
+        },
+        {
+          "step": 3,
+          "message": "Created page layout: bau_cp_featured_cat_Ice_Creams_spr_w_all_both_v2_page_p",
+          "status": "ok"
+        },
+        {
+          "step": 4,
+          "message": "Mapped 1 sub-cats → PLP widget",
+          "status": "ok"
+        },
+        {
+          "step": 5,
+          "message": "Mapped PLP → Page layout",
+          "status": "ok"
+        },
+        {
+          "step": 6,
+          "message": "Mapped Page → Global registry",
+          "status": "ok"
+        },
+        {
+          "step": 7,
+          "message": "Created 1 row widget items (state-wise)",
+          "status": "ok"
+        },
+        {
+          "step": 8,
+          "message": "Created single_product_row_v2 widget: bau_cp_featured_cat_Ice_Creams_spr_w_all_both_v2_spr_opt",
+          "status": "ok"
+        },
+        {
+          "step": 9,
+          "message": "Mapped Row items → SPR widget (state-wise)",
+          "status": "ok"
+        }
+      ],
+      "slug": "bau_cp_featured_cat_Ice_Creams_spr_w_all_both_v2",
+      "status": "deployed",
+      "spr_slug": "bau_cp_featured_cat_Ice_Creams_spr_w_all_both_v2_spr_opt",
+      "plp_slug": "bau_cp_featured_cat_Ice_Creams_spr_w_all_both_v2_plp_w",
+      "page_slug": "bau_cp_featured_cat_Ice_Creams_spr_w_all_both_v2_page_p",
+      "message": "Widget deployed! SPR slug: bau_cp_featured_cat_Ice_Creams_spr_w_all_both_v2_spr_opt"
+    },
+    "status": "success",
+    "error": "",
+    "timestamp": 1779957761.1320372,
+    "timestamp_iso": "2026-05-28T08:42:41Z"
+  },
+  {
+    "user_email": "sam_mcp",
+    "action": "slug.created",
+    "slug": "bau_cp_featured_cat_Ice_Creams_spr_w_all_both_v2",
+    "params": {
+      "type": "spr",
+      "states": [
+        "global"
+      ]
+    },
+    "response": {},
+    "status": "logged",
+    "error": "",
+    "timestamp": 1779957762.194159,
+    "timestamp_iso": "2026-05-28T08:42:42Z"
   }
 ]
