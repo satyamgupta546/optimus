@@ -45,9 +45,12 @@ export function getCsrfToken() {
  * @param {boolean} opts.multipart - Send as FormData (default: false → JSON)
  * @returns {Promise<Response>}
  */
-export async function callApi(endpoint, payload, { multipart = false } = {}) {
+export async function callApi(endpoint, payload, { multipart: forceMultipart = false } = {}) {
     const csrfToken = getCsrfToken();
     const url = `${API_BASE}${endpoint}`;
+
+    // Samaan Django rejects JSON POST with 405 — always use multipart for write endpoints
+    const multipart = true;
 
     const options = {
         method: 'POST',
@@ -179,17 +182,15 @@ export async function getWidgetId(slugName) {
  */
 export async function getWidgetItemId(slugName) {
     try {
-        // fetchWidgetItem endpoint supports GET with query params
-        const url = `${API_BASE}${ENDPOINTS.fetchWidgetItem}?slug_name=${encodeURIComponent(slugName)}`;
+        // Samaan endpoint: GET /api/app/get_widget_item/?widget_item_slug_name=...
+        const url = `${API_BASE}/api/app/get_widget_item/?widget_item_slug_name=${encodeURIComponent(slugName)}`;
         const res = await fetch(url, {
             credentials: 'include',
             headers: { 'X-CSRFToken': getCsrfToken() || '' },
         });
         if (!res.ok) return null;
         const data = await res.json();
-        const results = data.results || (Array.isArray(data) ? data : [data]);
-        const match = results.find(r => r.slug_name === slugName);
-        return match ? (match.id || match.pk || null) : null;
+        return data.id || data.pk || null;
     } catch {
         return null;
     }
