@@ -392,12 +392,33 @@ export const WidgetProvider = ({ children }) => {
                 headerWidgets: cleanHeaderWidgets(selectedHeaders),
             });
 
-            // SUPER_ADMIN auto-approve: server returns APPROVED status directly
+            // SUPER_ADMIN / CHECKER auto-approve: server returns APPROVED status directly
             const isAutoApproved = result?.status === 'APPROVED';
             setPageStatus(isAutoApproved ? 'APPROVED' : 'PENDING');
             logActivity('page_submitted', { widgetCount: widgetsToSubmit.length, totalWidgets: widgets.length, user: user?.email, autoApproved: isAutoApproved });
             if (isAutoApproved) {
-                showToast.success(`${widgetsToSubmit.length} widget(s) submitted & auto-approved!`);
+                showToast.success(`${widgetsToSubmit.length} widget(s) submitted & auto-approved! Deploying...`);
+                // Auto-deploy for SUPER_ADMIN / CHECKER
+                try {
+                    const { DeploymentService } = await import('../Backend/services/DeploymentService');
+                    const { getCsrfToken } = await import('../Backend/ApiClient');
+                    const deployData = {
+                        widgets: widgetsToSubmit,
+                        headerWidgets: cleanHeaderWidgets(selectedHeaders),
+                        id: result?.id || result?.request_id,
+                    };
+                    const deployResult = await DeploymentService.deployRequest(deployData, { csrftoken: getCsrfToken() });
+                    if (deployResult.success) {
+                        setPageStatus('DEPLOYED');
+                        showToast.success(deployResult.summary || 'Deployed successfully!');
+                    } else {
+                        showToast.error(`Deploy failed: ${deployResult.error || deployResult.summary}`);
+                        console.error('[Auto-Deploy] Failed:', deployResult.logs);
+                    }
+                } catch (deployErr) {
+                    showToast.error(`Auto-deploy failed: ${deployErr.message}`);
+                    console.error('[Auto-Deploy] Error:', deployErr);
+                }
             } else {
                 showToast.success(`${widgetsToSubmit.length} widget(s) submitted for review!`);
             }

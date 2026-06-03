@@ -115,8 +115,8 @@ router.post('/', async (req, res, next) => {
         throw submissionErr;
       }
 
-      // ── Step 3: Auto-approve for SUPER_ADMIN ──
-      if (req.user.role === 'SUPER_ADMIN') {
+      // ── Step 3: Auto-approve for SUPER_ADMIN and CHECKER ──
+      if (req.user.role === 'SUPER_ADMIN' || req.user.role === 'CHECKER') {
         try {
           await SubService.updateRequestStatus(finalRequestId, 'APPROVED', req.user, req.env);
           const widgetIds = createdWidgets.map(cw => cw.widget.widgetId);
