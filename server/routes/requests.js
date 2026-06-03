@@ -165,6 +165,9 @@ router.post('/:id/approve', async (req, res, next) => {
 
     const request = await SubService.fetchRequestById(req.params.id, req.env);
     if (!request) return res.status(404).json({ error: 'Request not found' });
+    if (request.status === 'APPROVED') {
+      return res.json({ id: req.params.id, status: 'APPROVED', updatedAt: request.updatedAt, alreadyApproved: true });
+    }
     if (request.status !== 'PENDING') {
       return res.status(400).json({ error: `Cannot approve request in ${request.status} status` });
     }
