@@ -3,6 +3,7 @@ import { LocalApiService } from '../services/LocalApiService';
 import { Search, Database, Globe, Loader2 } from 'lucide-react';
 import { safeUUID } from '../utils/uuid';
 import { prefetchProducts } from '../hooks/useCatalog';
+import { API_BASE } from '../config/apiConfig';
 
 /**
  * Fetch Widget Component
@@ -146,10 +147,7 @@ export default function FetchWidget({ onWidgetFetched }) {
         if (!slugName.trim()) { setError('Please enter a slug name'); return; }
         setLoading(true); setError('');
         try {
-            let widgetResponse = await fetch(`/api/app/widget/?slug_name=${encodeURIComponent(slugName.trim())}`);
-            if (!widgetResponse.ok && widgetResponse.status === 404) {
-                widgetResponse = await fetch(`/api/app/get_widget/?slug_name=${encodeURIComponent(slugName.trim())}`);
-            }
+            let widgetResponse = await fetch(`${API_BASE}/api/app/get_widget/?slug_name=${encodeURIComponent(slugName.trim())}`, { credentials: 'include' });
             if (widgetResponse.ok) {
                 const widgetData = await widgetResponse.json();
                 onWidgetFetched(formatWidgetData(widgetData));
@@ -157,10 +155,7 @@ export default function FetchWidget({ onWidgetFetched }) {
                 return;
             }
 
-            let itemResponse = await fetch(`/api/app/widget_item/?slug_name=${encodeURIComponent(slugName.trim())}`);
-            if (!itemResponse.ok && itemResponse.status === 404) {
-                itemResponse = await fetch(`/api/app/get_widget_item/?widget_item_slug_name=${encodeURIComponent(slugName.trim())}`);
-            }
+            let itemResponse = await fetch(`${API_BASE}/api/app/get_widget_item/?widget_item_slug_name=${encodeURIComponent(slugName.trim())}`, { credentials: 'include' });
             if (itemResponse.ok) {
                 const itemData = await itemResponse.json();
                 onWidgetFetched(formatWidgetItemData(itemData));
