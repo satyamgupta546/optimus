@@ -139,8 +139,8 @@ async def list_tools():
                 "properties": {
                     "action": {
                         "type": "string",
-                        "enum": ["upload", "dry_run"],
-                        "description": "upload = execute on Samaan, dry_run = preview CSV only"
+                        "enum": ["upload", "dry_run", "upload_from_sheet"],
+                        "description": "upload = execute on Samaan, dry_run = preview CSV only, upload_from_sheet = bulk upload from Excel sheet"
                     },
                     "items": {
                         "type": "array",
@@ -156,7 +156,14 @@ async def list_tools():
                     },
                     "env": {"type": "string", "enum": ["PROD", "UAT"], "description": "Environment: PROD or UAT (default: UAT)"},
                     "confirm": {"type": "boolean", "description": "Set true to execute upload"},
-                    "prod_ack": {"type": "boolean", "description": "Required for PROD uploads"}
+                    "prod_ack": {"type": "boolean", "description": "Required for PROD uploads"},
+                    "file_path": {"type": "string", "description": "Path to .xlsx file (for upload_from_sheet)"},
+                    "sheet_name": {"type": "string", "description": "Sheet name in Excel (default: first sheet)"},
+                    "slug_prefix": {"type": "string", "description": "Slug prefix (default: bau_HD_masthead_firstfold_june_2026)"},
+                    "subcat_col": {"type": "string", "description": "Column name for sub-category (default: Sub Category)"},
+                    "state_col": {"type": "string", "description": "Column name for state (default: State)"},
+                    "item_code_col": {"type": "string", "description": "Column name for item code (default: Item Code)"},
+                    "rank_col": {"type": "string", "description": "Column name for rank/priority (default: Rank)"}
                 },
                 "required": ["action"]
             }
@@ -276,7 +283,7 @@ async def homepage(request):
         <table>
             <tr><th>Tool</th><th>Actions</th></tr>
             <tr><td><code>sam_widget</code></td><td>create, edit, list, get, duplicate, history</td></tr>
-            <tr><td><code>sam_bulk</code></td><td>upload, dry_run</td></tr>
+            <tr><td><code>sam_bulk</code></td><td>upload, dry_run, upload_from_sheet</td></tr>
             <tr><td><code>sam_catalog</code></td><td>search, batch</td></tr>
             <tr><td><code>sam_page</code></td><td>locations, header_widgets</td></tr>
             <tr><td><code>sam_help</code></td><td>discovery (standalone)</td></tr>
